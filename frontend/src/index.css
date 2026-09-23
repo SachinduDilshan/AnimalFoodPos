@@ -128,3 +128,81 @@
     @apply font-sans;
     }
 }
+
+/* ==========================================================================
+   Receipt print output (ReceiptPreviewDialog.jsx)
+   Only the receipt content itself should reach paper — the app shell
+   (sidebar/nav, page content, toast notifications) and all dialog chrome
+   (backdrop, title, footer buttons, close icon) must be suppressed.
+   Depends on: dialog.jsx's data-slot="dialog-portal"/"dialog-overlay"/
+   "dialog-content"/"dialog-close" attributes, and ReceiptPreviewDialog.jsx's
+   .receipt-print-area wrapper class.
+   Kept outside @layer so it reliably overrides Tailwind's layered utilities
+   (e.g. dialog.jsx's fixed/-translate-x-1/2 classes) regardless of source
+   order; !important is a second line of defense, standard for print sheets.
+   ========================================================================== */
+@media print {
+  /* Radix's Dialog.Portal doesn't render its own wrapper DOM node (it just
+     teleports children straight to document.body via createPortal) despite
+     dialog.jsx passing it a data-slot="dialog-portal" prop — that attribute
+     lands nowhere, so hide the app shell by its actual, stable root id
+     instead of trying to exclude an assumed sibling wrapper that doesn't
+     exist. (Confirmed via computed-style inspection under emulated print
+     media: targeting the assumed wrapper left [data-slot="dialog-content"]
+     itself computed to display:none, hiding the receipt along with it.) */
+  #root {
+    display: none !important;
+  }
+
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+
+  [data-slot="dialog-overlay"] {
+    display: none !important;
+  }
+
+  [data-slot="dialog-content"] {
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
+    max-width: none !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  [data-slot="dialog-content"] > *:not(.receipt-print-area) {
+    display: none !important;
+  }
+
+  [data-slot="dialog-close"] {
+    display: none !important;
+  }
+
+  .receipt-print-area {
+    display: block !important;
+    width: 80mm !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin: 0 auto !important;
+    padding: 4mm !important;
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  .receipt-print-area * {
+    max-height: none !important;
+    overflow: visible !important;
+    color: #000 !important;
+  }
+
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+}
