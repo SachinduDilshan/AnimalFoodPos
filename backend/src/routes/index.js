@@ -1,4 +1,5 @@
 const express = require('express');
+const { createItemsRouter } = require('./items');
 
 /**
  * Builds the /api router. Feature routes get mounted here as they're built
@@ -15,6 +16,8 @@ function createRouter(db) {
 
     res.json({ ok: true, dbPath: db.name, tables });
   });
+
+  router.use('/items', createItemsRouter(db));
 
   return router;
 }
