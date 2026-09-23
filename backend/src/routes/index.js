@@ -1,5 +1,6 @@
 const express = require('express');
 const { createItemsRouter } = require('./items');
+const { createBillsRouter } = require('./bills');
 
 /**
  * Builds the /api router. Feature routes get mounted here as they're built
@@ -18,6 +19,7 @@ function createRouter(db) {
   });
 
   router.use('/items', createItemsRouter(db));
+  router.use('/bills', createBillsRouter(db));
 
   return router;
 }
