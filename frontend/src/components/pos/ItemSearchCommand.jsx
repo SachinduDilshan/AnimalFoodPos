@@ -41,6 +41,19 @@ export const ItemSearchCommand = forwardRef(function ItemSearchCommand({ items, 
 
   const { remainder } = parseQuickQty(inputValue)
 
+  const filteredItems = useMemo(() => {
+    if (!remainder) return items
+    const q = remainder.toLowerCase()
+    return items.filter((item) => searchText(item).includes(q))
+  }, [items, remainder])
+
+  // cmdk only updates `highlighted` on explicit hover/arrow-key navigation, so without
+  // this, typing a name and pressing Enter (without arrowing down first) would never
+  // resolve to anything — default the highlight to the top match on every search change.
+  useEffect(() => {
+    setHighlighted(filteredItems[0] ? searchText(filteredItems[0]) : '')
+  }, [filteredItems])
+
   function commit() {
     const { qty, remainder: text } = parseQuickQty(inputValue)
     if (!text) return
@@ -94,24 +107,31 @@ export const ItemSearchCommand = forwardRef(function ItemSearchCommand({ items, 
           onBlur={() => setOpen(false)}
           placeholder="Scan or search item by code, name, or barcode…"
         />
-        {open && inputValue && (
-          <CommandList
-            className="absolute top-full right-0 left-0 z-50 mt-1 rounded-lg border bg-popover shadow-md"
-            onMouseDown={(e) => e.preventDefault()}
-          >
-            <CommandEmpty className="py-4 text-sm text-muted-foreground">
-              No items match "{remainder}".
-            </CommandEmpty>
-            {items.map((item) => (
-              <CommandItem key={item.id} value={searchText(item)} onSelect={commit}>
-                <span className="font-mono text-xs">{item.code}</span>
-                <span className="flex-1">{item.name}</span>
-                <span className="text-xs text-muted-foreground">{item.unit}</span>
-                <span className="text-xs text-muted-foreground">{formatRupees(item.sellingPrice)}</span>
-              </CommandItem>
-            ))}
-          </CommandList>
-        )}
+        {/*
+          Always mounted (not conditionally rendered on `open`) so cmdk always has every
+          CommandItem registered — otherwise the auto-highlight-first-match effect above
+          has nothing to point `highlighted` at, and committing via Enter without first
+          opening/navigating the dropdown would never resolve to an item. Visibility is
+          purely a CSS toggle instead.
+        */}
+        <CommandList
+          className={`absolute top-full right-0 left-0 z-50 mt-1 rounded-lg border bg-popover shadow-md ${
+            open && inputValue ? '' : 'hidden'
+          }`}
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          <CommandEmpty className="py-4 text-sm text-muted-foreground">
+            No items match "{remainder}".
+          </CommandEmpty>
+          {items.map((item) => (
+            <CommandItem key={item.id} value={searchText(item)} onSelect={commit}>
+              <span className="font-mono text-xs">{item.code}</span>
+              <span className="flex-1">{item.name}</span>
+              <span className="text-xs text-muted-foreground">{item.unit}</span>
+              <span className="text-xs text-muted-foreground">{formatRupees(item.sellingPrice)}</span>
+            </CommandItem>
+          ))}
+        </CommandList>
       </Command>
     </div>
   )
