@@ -1,13 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import client from '@/api/client'
-
-function errorMessage(err) {
-  const data = err.response?.data
-  if (data?.issues?.length) return data.issues.map((issue) => issue.message).join('; ')
-  if (data?.error) return data.error
-  return err.message
-}
+import { getErrorMessage as errorMessage } from '@/lib/apiError'
 
 export function useItems() {
   const [items, setItems] = useState([])
