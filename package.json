@@ -1,0 +1,49 @@
+{
+  "name": "animal-food-pos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Offline desktop POS + inventory app for an animal food shop",
+  "main": "electron/main.js",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev:backend": "nodemon backend/src/dev.js",
+    "dev:frontend": "npm run dev --workspace frontend",
+    "dev": "concurrently -k -n ELECTRON,VITE -c yellow,cyan \"npm:dev:electron\" \"npm:dev:frontend\"",
+    "dev:electron": "wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .",
+    "rebuild": "electron-rebuild -f -w better-sqlite3",
+    "build:frontend": "npm run build --workspace frontend",
+    "build": "npm run build:frontend && electron-builder"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3",
+    "electron": "^44.4.4",
+    "electron-builder": "^25.1.8",
+    "electron-rebuild": "^3.2.9",
+    "wait-on": "^8.0.1"
+  },
+  "build": {
+    "appId": "com.animalfoodpos.app",
+    "productName": "Animal Food POS",
+    "files": [
+      "electron/**/*",
+      "backend/**/*",
+      "frontend/dist/**/*",
+      "!backend/dev.db",
+      "!backend/src/**/*.sql.bak"
+    ],
+    "extraMetadata": {
+      "main": "electron/main.js"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
