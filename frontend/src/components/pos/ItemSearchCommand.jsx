@@ -11,8 +11,11 @@ function parseQuickQty(raw) {
   return { qty: Number(match[1]), remainder: match[2].trim() }
 }
 
+// Trimmed because cmdk trims the value it hands back to onSelect internally — if this
+// didn't match, items with no barcode (a trailing space here) would never resolve when
+// clicked, since the map key and the value cmdk reports back would silently differ.
 function searchText(item) {
-  return `${item.code} ${item.name} ${item.barcode ?? ''}`.toLowerCase()
+  return `${item.code} ${item.name} ${item.barcode ?? ''}`.toLowerCase().trim()
 }
 
 export const ItemSearchCommand = forwardRef(function ItemSearchCommand({ items, onAddItem }, ref) {
@@ -54,16 +57,25 @@ export const ItemSearchCommand = forwardRef(function ItemSearchCommand({ items, 
     setHighlighted(filteredItems[0] ? searchText(filteredItems[0]) : '')
   }, [filteredItems])
 
-  function commit() {
+  // `selectedValue` is passed by cmdk when a specific CommandItem is clicked (or
+  // Enter-confirmed while navigated to it) — it must take priority over whatever's
+  // merely auto-highlighted, otherwise clicking any result but the top one silently
+  // resolves to the wrong item. It's absent when Enter fires from the raw input itself.
+  function commit(selectedValue) {
     const { qty, remainder: text } = parseQuickQty(inputValue)
     if (!text) return
 
-    const exact = items.find(
-      (i) =>
-        i.code.toLowerCase() === text.toLowerCase() ||
-        (i.barcode && i.barcode.toLowerCase() === text.toLowerCase()),
-    )
-    const resolved = exact ?? itemsByCommandValue.get(highlighted)
+    let resolved
+    if (selectedValue) {
+      resolved = itemsByCommandValue.get(selectedValue)
+    } else {
+      const exact = items.find(
+        (i) =>
+          i.code.toLowerCase() === text.toLowerCase() ||
+          (i.barcode && i.barcode.toLowerCase() === text.toLowerCase()),
+      )
+      resolved = exact ?? itemsByCommandValue.get(highlighted)
+    }
 
     if (!resolved) {
       toast.error(`No item found for "${text}"`)
