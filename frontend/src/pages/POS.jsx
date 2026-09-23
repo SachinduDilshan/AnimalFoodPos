@@ -46,9 +46,16 @@ export default function POS() {
   const [submitting, setSubmitting] = useState(false)
 
   const searchRef = useRef(null)
+  const [focusRequest, setFocusRequest] = useState(null)
+
+  function focusSearch() {
+    searchRef.current?.focus()
+  }
 
   function handleAddItem(item, qty) {
     cart.addItem({ item, qty })
+    // Always a new object so the effect fires even when re-scanning the same item twice in a row.
+    setFocusRequest({ itemId: item.id, at: Date.now() })
   }
 
   function resetForNextSale() {
@@ -58,7 +65,7 @@ export default function POS() {
     setVatPercent(0)
     setPaymentMethod('CASH')
     setAmountPaid('')
-    searchRef.current?.focus()
+    focusSearch()
   }
 
   async function handleCompleteSale() {
@@ -108,7 +115,13 @@ export default function POS() {
           {itemsLoading ? (
             <p className="text-sm text-muted-foreground">Loading items…</p>
           ) : (
-            <CartTable lines={cart.lines} onUpdateLine={cart.updateLine} onRemoveLine={cart.removeLine} />
+            <CartTable
+              lines={cart.lines}
+              onUpdateLine={cart.updateLine}
+              onRemoveLine={cart.removeLine}
+              focusRequest={focusRequest}
+              onFocusSearch={focusSearch}
+            />
           )}
         </div>
 
