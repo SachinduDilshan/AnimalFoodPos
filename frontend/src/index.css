@@ -186,11 +186,11 @@
 
   .receipt-print-area {
     display: block !important;
-    width: 80mm !important;
+    width: 100% !important;
     max-height: none !important;
     overflow: visible !important;
-    margin: 0 auto !important;
-    padding: 4mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
     color: #000 !important;
     background: #fff !important;
   }
@@ -201,8 +201,12 @@
     color: #000 !important;
   }
 
+  /* Standard 9.5"x11" continuous/pin-feed computer paper (not cut-sheet
+     Letter), per the client's actual printer — full-width invoice layout,
+     so margin does the page-edge spacing instead of .receipt-print-area
+     padding (which the old narrow-receipt design used instead). */
   @page {
-    size: 80mm auto;
-    margin: 0;
+    size: 9.5in 11in;
+    margin: 0.5in;
   }
 }
