@@ -131,80 +131,48 @@
 
 /* ==========================================================================
    Receipt print output (ReceiptPreviewDialog.jsx)
-   Only the receipt content itself should reach paper — the app shell
-   (sidebar/nav, page content, toast notifications) and all dialog chrome
-   (backdrop, title, footer buttons, close icon) must be suppressed.
-   Depends on: dialog.jsx's data-slot="dialog-portal"/"dialog-overlay"/
-   "dialog-content"/"dialog-close" attributes, and ReceiptPreviewDialog.jsx's
-   .receipt-print-area wrapper class.
-   Kept outside @layer so it reliably overrides Tailwind's layered utilities
-   (e.g. dialog.jsx's fixed/-translate-x-1/2 classes) regardless of source
-   order; !important is a second line of defense, standard for print sheets.
+   Only the receipt content itself should reach paper.
+   Depends on: ReceiptPreviewDialog.jsx portals a dedicated copy of the
+   receipt (#receipt-print-root) directly to document.body — a sibling of
+   #root, not nested inside it or inside the on-screen Dialog.
+
+   Two earlier attempts fought the on-screen Dialog's own fixed-position/
+   transform/portal/scroll machinery to reuse IT as the print target, and
+   both broke in practice (confirmed each time by actually generating a
+   PDF via printToPDF and rendering it — computed styles alone didn't
+   catch either bug): first, hiding-everything-except-an-assumed-wrapper
+   left the dialog content itself hidden; then, visibility:hidden +
+   position:absolute (the standard "print only this element" trick) fixed
+   that but silently clipped any receipt taller than one page instead of
+   paginating it, since absolutely-positioned content doesn't participate
+   in normal print pagination.
+
+   Rendering a plain, separate, normal-flow copy as a direct child of body
+   sidesteps all of that — there's nothing to neutralize, so hiding is a
+   simple top-level-siblings check, and long receipts paginate across
+   pages exactly like any other long HTML page.
+   Kept outside @layer so it reliably overrides Tailwind's layered
+   utilities regardless of source order; !important is a second line of
+   defense, standard for print sheets.
    ========================================================================== */
 @media print {
-  /* Radix's Dialog.Portal doesn't render its own wrapper DOM node (it just
-     teleports children straight to document.body via createPortal) despite
-     dialog.jsx passing it a data-slot="dialog-portal" prop — that attribute
-     lands nowhere, so hide the app shell by its actual, stable root id
-     instead of trying to exclude an assumed sibling wrapper that doesn't
-     exist. (Confirmed via computed-style inspection under emulated print
-     media: targeting the assumed wrapper left [data-slot="dialog-content"]
-     itself computed to display:none, hiding the receipt along with it.) */
-  #root {
+  body > *:not(#receipt-print-root) {
     display: none !important;
   }
 
-  [data-sonner-toaster] {
-    display: none !important;
-  }
-
-  [data-slot="dialog-overlay"] {
-    display: none !important;
-  }
-
-  [data-slot="dialog-content"] {
-    position: static !important;
-    inset: auto !important;
-    transform: none !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    background: #fff !important;
-    color: #000 !important;
-    max-width: none !important;
-    width: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  [data-slot="dialog-content"] > *:not(.receipt-print-area) {
-    display: none !important;
-  }
-
-  [data-slot="dialog-close"] {
-    display: none !important;
-  }
-
-  .receipt-print-area {
+  #receipt-print-root {
     display: block !important;
-    width: 100% !important;
-    max-height: none !important;
-    overflow: visible !important;
-    margin: 0 !important;
-    padding: 0 !important;
     color: #000 !important;
     background: #fff !important;
   }
 
-  .receipt-print-area * {
-    max-height: none !important;
-    overflow: visible !important;
+  #receipt-print-root * {
     color: #000 !important;
   }
 
   /* Standard 9.5"x11" continuous/pin-feed computer paper (not cut-sheet
      Letter), per the client's actual printer — full-width invoice layout,
-     so margin does the page-edge spacing instead of .receipt-print-area
-     padding (which the old narrow-receipt design used instead). */
+     so @page margin does the page-edge spacing. */
   @page {
     size: 9.5in 11in;
     margin: 0.5in;
