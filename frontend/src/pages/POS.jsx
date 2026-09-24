@@ -4,10 +4,10 @@ import client from '@/api/client'
 import { useItems } from '@/hooks/useItems'
 import { useCart } from '@/hooks/useCart'
 import { getErrorMessage } from '@/lib/apiError'
-import { formatRupees } from '@/lib/currency'
 import { ItemSearchCommand } from '@/components/pos/ItemSearchCommand'
 import { CartTable } from '@/components/pos/CartTable'
 import { BillSummary } from '@/components/pos/BillSummary'
+import { ReceiptPreviewDialog } from '@/components/pos/ReceiptPreviewDialog'
 
 // vatPercent is intentionally not accepted here — it's preview-only until backend
 // VAT-override support lands, and the bills schema would reject an unknown field anyway.
@@ -47,6 +47,7 @@ export default function POS() {
 
   const searchRef = useRef(null)
   const [focusRequest, setFocusRequest] = useState(null)
+  const [completedBill, setCompletedBill] = useState(null)
 
   function focusSearch() {
     searchRef.current?.focus()
@@ -68,8 +69,15 @@ export default function POS() {
     focusSearch()
   }
 
+  function handleReceiptDialogOpenChange(open) {
+    if (!open) {
+      setCompletedBill(null)
+      resetForNextSale()
+    }
+  }
+
   async function handleCompleteSale() {
-    if (cart.lines.length === 0 || submitting) return
+    if (cart.lines.length === 0 || submitting || completedBill !== null) return
     setSubmitting(true)
     try {
       const payload = buildPayload({
@@ -80,10 +88,7 @@ export default function POS() {
         amountPaid,
       })
       const res = await client.post('/bills', payload)
-      const bill = res.data
-      const changeNote = bill.changeGiven > 0 ? `, Change ${formatRupees(bill.changeGiven)}` : ''
-      toast.success(`Bill ${bill.billNo} completed — Total ${formatRupees(bill.grandTotal)}${changeNote}`)
-      resetForNextSale()
+      setCompletedBill(res.data)
     } catch (err) {
       toast.error(getErrorMessage(err))
     } finally {
@@ -143,6 +148,12 @@ export default function POS() {
           onCompleteSale={handleCompleteSale}
         />
       </div>
+
+      <ReceiptPreviewDialog
+        bill={completedBill}
+        open={completedBill !== null}
+        onOpenChange={handleReceiptDialogOpenChange}
+      />
     </div>
   )
 }

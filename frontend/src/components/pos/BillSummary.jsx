@@ -5,17 +5,9 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { computeBillTotals, computeChangeDue } from '@/lib/billCalculations'
 import { formatRupees } from '@/lib/currency'
+import { TotalRow } from '@/components/pos/TotalRow'
 
 const PAYMENT_METHODS = ['CASH', 'CARD', 'CREDIT', 'OTHER']
-
-function TotalRow({ label, value, emphasize }) {
-  return (
-    <div className={`flex items-center justify-between ${emphasize ? 'text-base font-semibold' : 'text-sm'}`}>
-      <span className={emphasize ? '' : 'text-muted-foreground'}>{label}</span>
-      <span>{value}</span>
-    </div>
-  )
-}
 
 export function BillSummary({
   lines,
