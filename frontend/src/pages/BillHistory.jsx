@@ -56,7 +56,7 @@ export default function BillHistory() {
 
       <div className="flex items-center gap-3">
         <Input
-          placeholder="Search by bill number or date…"
+          placeholder="Search by invoice number or date…"
           className="max-w-xs"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -75,7 +75,7 @@ export default function BillHistory() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Bill No</TableHead>
+            <TableHead>Invoice No</TableHead>
             <TableHead>Date</TableHead>
             <TableHead>Payment Method</TableHead>
             <TableHead>Grand Total</TableHead>
@@ -103,7 +103,7 @@ export default function BillHistory() {
           {!loading &&
             bills.map((bill) => (
               <TableRow key={bill.id}>
-                <TableCell className="font-mono text-xs">{bill.billNo}</TableCell>
+                <TableCell className="font-mono text-xs">{bill.invoiceNo}</TableCell>
                 <TableCell>{formatDate(bill.createdAt)}</TableCell>
                 <TableCell>{bill.paymentMethod}</TableCell>
                 <TableCell>{formatRupees(bill.grandTotal)}</TableCell>

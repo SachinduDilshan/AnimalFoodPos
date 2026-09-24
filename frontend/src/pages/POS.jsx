@@ -10,7 +10,18 @@ import { CartTable } from '@/components/pos/CartTable'
 import { BillSummary } from '@/components/pos/BillSummary'
 import { ReceiptPreviewDialog } from '@/components/pos/ReceiptPreviewDialog'
 
-function buildPayload({ lines, billDiscountType, billDiscountValue, vatPercent, paymentMethod, amountPaid }) {
+function buildPayload({
+  lines,
+  billDiscountType,
+  billDiscountValue,
+  vatPercent,
+  paymentMethod,
+  amountPaid,
+  customerName,
+  customerAddress,
+  customerPhone,
+  customerVatNumber,
+}) {
   return {
     items: lines.map((l) => ({
       itemId: l.itemId,
@@ -30,6 +41,10 @@ function buildPayload({ lines, billDiscountType, billDiscountValue, vatPercent, 
     ...(paymentMethod === 'CASH' && { amountPaid: Number(amountPaid) }),
     ...(paymentMethod === 'CREDIT' && Number(amountPaid) > 0 && { amountPaid: Number(amountPaid) }),
     // CARD/OTHER: amountPaid omitted — server ignores/forces it
+    ...(customerName.trim() && { customerName: customerName.trim() }),
+    ...(customerAddress.trim() && { customerAddress: customerAddress.trim() }),
+    ...(customerPhone.trim() && { customerPhone: customerPhone.trim() }),
+    ...(customerVatNumber.trim() && { customerVatNumber: customerVatNumber.trim() }),
   }
 }
 
@@ -42,6 +57,10 @@ export default function POS() {
   const [vatPercent, setVatPercent] = useState(0)
   const [paymentMethod, setPaymentMethod] = useState('CASH')
   const [amountPaid, setAmountPaid] = useState('')
+  const [customerName, setCustomerName] = useState('')
+  const [customerAddress, setCustomerAddress] = useState('')
+  const [customerPhone, setCustomerPhone] = useState('')
+  const [customerVatNumber, setCustomerVatNumber] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   const searchRef = useRef(null)
@@ -95,6 +114,10 @@ export default function POS() {
     setVatPercent(0)
     setPaymentMethod('CASH')
     setAmountPaid('')
+    setCustomerName('')
+    setCustomerAddress('')
+    setCustomerPhone('')
+    setCustomerVatNumber('')
     focusSearch()
   }
 
@@ -116,6 +139,10 @@ export default function POS() {
         vatPercent,
         paymentMethod,
         amountPaid,
+        customerName,
+        customerAddress,
+        customerPhone,
+        customerVatNumber,
       })
       const res = await client.post('/bills', payload)
       setCompletedBill(res.data)
@@ -171,6 +198,14 @@ export default function POS() {
           onPaymentMethodChange={setPaymentMethod}
           amountPaid={amountPaid}
           onAmountPaidChange={setAmountPaid}
+          customerName={customerName}
+          onCustomerNameChange={setCustomerName}
+          customerAddress={customerAddress}
+          onCustomerAddressChange={setCustomerAddress}
+          customerPhone={customerPhone}
+          onCustomerPhoneChange={setCustomerPhone}
+          customerVatNumber={customerVatNumber}
+          onCustomerVatNumberChange={setCustomerVatNumber}
           submitting={submitting}
           onCompleteSale={handleCompleteSale}
         />
