@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { formatRupees } from '@/lib/currency'
 import { TotalRow } from '@/components/pos/TotalRow'
+import { SHOP_NAME, SHOP_ADDRESS, SHOP_PHONE } from '@/config/shopInfo'
 
 export function ReceiptPreviewDialog({ bill, open, onOpenChange }) {
   return (
@@ -15,7 +16,10 @@ export function ReceiptPreviewDialog({ bill, open, onOpenChange }) {
 
             <div className="receipt-print-area mx-auto max-h-[70vh] w-[80mm] overflow-y-auto font-mono text-xs print:max-h-none print:overflow-visible">
               <div className="mb-2 text-center">
-                <div className="text-sm font-semibold">RECEIPT</div>
+                <div className="text-sm font-semibold">{SHOP_NAME}</div>
+                <div>{SHOP_ADDRESS}</div>
+                <div>Tel: {SHOP_PHONE}</div>
+                <div className="my-1 border-t border-dashed" />
                 <div>Bill No: {bill.billNo}</div>
                 <div>
                   {new Date(bill.createdAt).toLocaleString('en-LK', {
