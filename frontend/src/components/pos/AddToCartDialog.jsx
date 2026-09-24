@@ -28,15 +28,17 @@ function focusField(container, field) {
   el?.select?.()
 }
 
-export function AddToCartDialog({ open, onOpenChange, item, onConfirm }) {
+export function AddToCartDialog({ open, onOpenChange, item, initialValues, onConfirm }) {
   const containerRef = useRef(null)
-  // Lazy initializers so a freshly-keyed instance (POS.jsx renders this with
-  // key={item?.id ?? 'none'}, forcing a remount per item) starts with the right values
-  // immediately — no reliance on an effect correcting a stale DOM value after the fact.
-  const [qty, setQty] = useState('1')
-  const [rate, setRate] = useState(() => String(item?.sellingPrice ?? '0'))
-  const [discountType, setDiscountType] = useState('NONE')
-  const [discountValue, setDiscountValue] = useState('0')
+  const isEdit = initialValues != null
+  // Lazy initializers so a freshly-keyed instance (POS.jsx keys this by mode+item id,
+  // forcing a remount per open) starts with the right values immediately — no reliance on
+  // an effect correcting a stale DOM value after the fact. When initialValues is absent
+  // (fresh add) these fall through to the same defaults as before.
+  const [qty, setQty] = useState(() => String(initialValues?.qty ?? '1'))
+  const [rate, setRate] = useState(() => String(initialValues?.rate ?? item?.sellingPrice ?? '0'))
+  const [discountType, setDiscountType] = useState(() => initialValues?.discountType ?? 'NONE')
+  const [discountValue, setDiscountValue] = useState(() => String(initialValues?.discountValue ?? '0'))
   const [pendingDiscountFocus, setPendingDiscountFocus] = useState(false)
 
   function confirmAndClose() {
@@ -106,7 +108,7 @@ export function AddToCartDialog({ open, onOpenChange, item, onConfirm }) {
           className="flex flex-col gap-4"
         >
           <DialogHeader>
-            <DialogTitle>Add "{item.name}" to Cart</DialogTitle>
+            <DialogTitle>{isEdit ? `Edit "${item.name}" in Cart` : `Add "${item.name}" to Cart`}</DialogTitle>
           </DialogHeader>
 
           <div className="flex flex-col gap-3">
@@ -184,7 +186,7 @@ export function AddToCartDialog({ open, onOpenChange, item, onConfirm }) {
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit">Add to Cart</Button>
+            <Button type="submit">{isEdit ? 'Save Changes' : 'Add to Cart'}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

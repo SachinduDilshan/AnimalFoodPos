@@ -47,32 +47,47 @@ export default function POS() {
   const [submitting, setSubmitting] = useState(false)
 
   const searchRef = useRef(null)
-  // Always null now — qty/rate/discount are entered in AddToCartDialog before a line ever
-  // reaches the cart, so CartTable no longer needs to be told to auto-focus a just-added row.
-  // Left wired in (rather than removed from CartTable) since CartTable's own inline-edit
-  // Enter-chain still independently depends on the sibling onFocusSearch prop.
-  const focusRequest = null
   const [completedBill, setCompletedBill] = useState(null)
-  const [pendingItem, setPendingItem] = useState(null)
+  // Drives AddToCartDialog for both flows:
+  //   { item, mode: 'add' } — picked from ItemPickerList, fresh defaults
+  //   { item, mode: 'edit', initialValues: { qty, rate, discountType, discountValue } } — editing an existing cart line
+  const [dialogTarget, setDialogTarget] = useState(null)
 
   function focusSearch() {
     searchRef.current?.focus()
   }
 
   function handlePickItem(item) {
-    setPendingItem(item)
+    setDialogTarget({ item, mode: 'add' })
   }
 
-  function handleAddModalOpenChange(open) {
+  function handleEditLine(line) {
+    setDialogTarget({
+      item: line.item,
+      mode: 'edit',
+      initialValues: {
+        qty: line.qty,
+        rate: line.rate,
+        discountType: line.discountType,
+        discountValue: line.discountValue,
+      },
+    })
+  }
+
+  function handleDialogOpenChange(open) {
     if (!open) {
-      setPendingItem(null)
+      setDialogTarget(null)
       focusSearch()
     }
   }
 
-  function handleConfirmAdd({ qty, rate, discountType, discountValue }) {
-    cart.addItem({ item: pendingItem, qty, rate, discountType, discountValue })
-    searchRef.current?.clear()
+  function handleDialogConfirm({ qty, rate, discountType, discountValue }) {
+    if (dialogTarget?.mode === 'edit') {
+      cart.updateLine(dialogTarget.item.id, { qty, rate, discountType, discountValue })
+    } else {
+      cart.addItem({ item: dialogTarget.item, qty, rate, discountType, discountValue })
+      searchRef.current?.clear()
+    }
   }
 
   function resetForNextSale() {
@@ -138,10 +153,8 @@ export default function POS() {
         ) : (
           <CartTable
             lines={cart.lines}
-            onUpdateLine={cart.updateLine}
+            onEditLine={handleEditLine}
             onRemoveLine={cart.removeLine}
-            focusRequest={focusRequest}
-            onFocusSearch={focusSearch}
           />
         )}
 
@@ -165,11 +178,12 @@ export default function POS() {
       </div>
 
       <AddToCartDialog
-        key={pendingItem?.id ?? 'none'}
-        open={pendingItem !== null}
-        onOpenChange={handleAddModalOpenChange}
-        item={pendingItem}
-        onConfirm={handleConfirmAdd}
+        key={dialogTarget ? `${dialogTarget.mode}-${dialogTarget.item.id}` : 'none'}
+        open={dialogTarget !== null}
+        onOpenChange={handleDialogOpenChange}
+        item={dialogTarget?.item ?? null}
+        initialValues={dialogTarget?.initialValues}
+        onConfirm={handleDialogConfirm}
       />
 
       <ReceiptPreviewDialog

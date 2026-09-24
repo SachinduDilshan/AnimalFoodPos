@@ -9,9 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { ProductCell } from '@/components/pos/ProductCell'
 import { formatRupees } from '@/lib/currency'
 
-const COLUMN_COUNT = 5
+const COLUMN_COUNT = 3
 
 function matchesSearch(item, term) {
   if (!term.trim()) return true
@@ -96,15 +97,13 @@ export const ItemPickerList = forwardRef(function ItemPickerList({ items, onPick
             onKeyDown={handleKeyDown}
           />
 
-          <div className="min-h-0 flex-1 overflow-y-auto rounded-md border">
+          <div className="min-h-0 flex-1 overflow-y-auto rounded-md ">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="sticky top-0 z-10 bg-background">Code</TableHead>
-                  <TableHead className="sticky top-0 z-10 bg-background">Name</TableHead>
-                  <TableHead className="sticky top-0 z-10 bg-background text-center">Unit</TableHead>
+                  <TableHead className="sticky pl-3 top-0 z-10 bg-background">Product</TableHead>
                   <TableHead className="sticky top-0 z-10 bg-background text-right">Price</TableHead>
-                  <TableHead className="sticky top-0 z-10 bg-background text-right">Stock</TableHead>
+                  <TableHead className="sticky pr-3 top-0 z-10 bg-background text-right">Stock</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -124,11 +123,11 @@ export const ItemPickerList = forwardRef(function ItemPickerList({ items, onPick
                     className="cursor-pointer hover:bg-accent data-[highlighted=true]:bg-accent"
                     onClick={() => onPickItem(item)}
                   >
-                    <TableCell className="font-mono text-xs">{item.code}</TableCell>
-                    <TableCell>{item.name}</TableCell>
-                    <TableCell className="text-center">{item.unit}</TableCell>
+                    <TableCell className="pl-3">
+                      <ProductCell item={item} />
+                    </TableCell>
                     <TableCell className="text-right">{formatRupees(item.sellingPrice)}</TableCell>
-                    <TableCell className="text-right">{item.stockQty}</TableCell>
+                    <TableCell className="text-right pr-3">{item.stockQty}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
