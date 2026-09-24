@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import {
   Table,
@@ -82,52 +83,59 @@ export const ItemPickerList = forwardRef(function ItemPickerList({ items, onPick
   }
 
   return (
-    <div ref={containerRef} className="flex flex-col gap-2">
-      <Input
-        placeholder="Search item by code, name, or barcode…"
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        onKeyDown={handleKeyDown}
-      />
+    <Card className="flex h-[80vh] flex-col">
+      <CardHeader>
+        <CardTitle>Items</CardTitle>
+      </CardHeader>
+      <CardContent className="min-h-0 flex-1">
+        <div ref={containerRef} className="flex h-full min-h-0 flex-col gap-2">
+          <Input
+            placeholder="Search item by code, name, or barcode…"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
 
-      <div className="max-h-[70vh] overflow-y-auto rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="sticky top-0 z-10 bg-background">Code</TableHead>
-              <TableHead className="sticky top-0 z-10 bg-background">Name</TableHead>
-              <TableHead className="sticky top-0 z-10 bg-background text-center">Unit</TableHead>
-              <TableHead className="sticky top-0 z-10 bg-background text-right">Price</TableHead>
-              <TableHead className="sticky top-0 z-10 bg-background text-right">Stock</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredItems.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={COLUMN_COUNT} className="py-6 text-center text-muted-foreground">
-                  No items match your search.
-                </TableCell>
-              </TableRow>
-            )}
+          <div className="min-h-0 flex-1 overflow-y-auto rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="sticky top-0 z-10 bg-background">Code</TableHead>
+                  <TableHead className="sticky top-0 z-10 bg-background">Name</TableHead>
+                  <TableHead className="sticky top-0 z-10 bg-background text-center">Unit</TableHead>
+                  <TableHead className="sticky top-0 z-10 bg-background text-right">Price</TableHead>
+                  <TableHead className="sticky top-0 z-10 bg-background text-right">Stock</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredItems.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={COLUMN_COUNT} className="py-6 text-center text-muted-foreground">
+                      No items match your search.
+                    </TableCell>
+                  </TableRow>
+                )}
 
-            {filteredItems.map((item, index) => (
-              <TableRow
-                key={item.id}
-                data-row-index={index}
-                data-highlighted={index === highlightedIndex ? 'true' : undefined}
-                className="cursor-pointer hover:bg-accent data-[highlighted=true]:bg-accent"
-                onClick={() => onPickItem(item)}
-              >
-                <TableCell className="font-mono text-xs">{item.code}</TableCell>
-                <TableCell>{item.name}</TableCell>
-                <TableCell className="text-center">{item.unit}</TableCell>
-                <TableCell className="text-right">{formatRupees(item.sellingPrice)}</TableCell>
-                <TableCell className="text-right">{item.stockQty}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
+                {filteredItems.map((item, index) => (
+                  <TableRow
+                    key={item.id}
+                    data-row-index={index}
+                    data-highlighted={index === highlightedIndex ? 'true' : undefined}
+                    className="cursor-pointer hover:bg-accent data-[highlighted=true]:bg-accent"
+                    onClick={() => onPickItem(item)}
+                  >
+                    <TableCell className="font-mono text-xs">{item.code}</TableCell>
+                    <TableCell>{item.name}</TableCell>
+                    <TableCell className="text-center">{item.unit}</TableCell>
+                    <TableCell className="text-right">{formatRupees(item.sellingPrice)}</TableCell>
+                    <TableCell className="text-right">{item.stockQty}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 })

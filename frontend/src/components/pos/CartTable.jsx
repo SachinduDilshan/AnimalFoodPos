@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -79,147 +80,154 @@ export function CartTable({
   }
 
   return (
-    <div ref={containerRef}>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="text-left w-32">Code</TableHead>
-            <TableHead className="text-left">Name</TableHead>
-            <TableHead className="text-center">Unit</TableHead>
-            <TableHead className="text-left w-20">Qty</TableHead>
-            <TableHead className="text-left w-48">Rate</TableHead>
-            <TableHead className="text-left w-52">Discount</TableHead>
-            <TableHead className="text-left">Line Total</TableHead>
-            <TableHead className="text-center">Remove</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {lines.length === 0 && (
-            <TableRow>
-              <TableCell
-                colSpan={COLUMN_COUNT}
-                className="py-6 text-center text-muted-foreground"
-              >
-                Cart is empty — scan or search for an item above.
-              </TableCell>
-            </TableRow>
-          )}
-
-          {lines.map((line) => {
-            const { lineTotal } = computeLineTotal(line);
-            const isKg = line.item.unit === "KG";
-            const step = isKg ? "0.01" : "1";
-
-            return (
-              <TableRow key={line.itemId} data-row-id={line.itemId}>
-                <TableCell className="font-mono text-xs">
-                  {line.item.code}
-                </TableCell>
-                <TableCell className="text-left">{line.item.name}</TableCell>
-                <TableCell className="text-center">{line.item.unit}</TableCell>
-                <TableCell>
-                  <Input
-                    type="number"
-                    step={step}
-                    min={step}
-                    value={line.qty}
-                    className="w-20"
-                    data-field="qty"
-                    onChange={(e) =>
-                      onUpdateLine(line.itemId, { qty: Number(e.target.value) })
-                    }
-                    onKeyDown={(e) =>
-                      handleFieldKeyDown(e, line.itemId, "rate")
-                    }
-                  />
-                </TableCell>
-                <TableCell>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={line.rate}
-                    className="w-full"
-                    data-field="rate"
-                    onChange={(e) =>
-                      onUpdateLine(line.itemId, {
-                        rate: Number(e.target.value),
-                      })
-                    }
-                    onKeyDown={(e) =>
-                      handleFieldKeyDown(e, line.itemId, "discount-type")
-                    }
-                  />
-                </TableCell>
-                <TableCell>
-                  <div className="flex text-center items-center gap-1">
-                    <Select
-                      value={line.discountType}
-                      onValueChange={(value) => {
-                        onUpdateLine(line.itemId, {
-                          discountType: value,
-                          discountValue: 0,
-                        });
-                        setPendingDiscountFocus({ itemId: line.itemId });
-                      }}
-                    >
-                      <SelectTrigger
-                        className="w-24"
-                        data-field="discount-type"
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      {/*
-                        Radix restores focus to the trigger when the popup closes, which fires
-                        after (and overrides) the pendingDiscountFocus effect's own focus call
-                        below — opt out of that default so our explicit focus wins.
-                      */}
-                      <SelectContent
-                        onCloseAutoFocus={(e) => e.preventDefault()}
-                      >
-                        <SelectItem value="NONE">None</SelectItem>
-                        <SelectItem value="PERCENT">Percent</SelectItem>
-                        <SelectItem value="FLAT">Flat</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      max={line.discountType === "PERCENT" ? "100" : undefined}
-                      disabled={line.discountType === "NONE"}
-                      value={line.discountValue}
-                      className="w-20"
-                      data-field="discount-value"
-                      onChange={(e) =>
-                        onUpdateLine(line.itemId, {
-                          discountValue: Number(e.target.value),
-                        })
-                      }
-                      onKeyDown={(e) =>
-                        handleFieldKeyDown(e, line.itemId, null)
-                      }
-                    />
-                  </div>
-                </TableCell>
-                <TableCell className="text-left">
-                  {formatRupees(lineTotal)}
-                </TableCell>
-                <TableCell className="text-center">
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={`Remove ${line.item.name}`}
-                    onClick={() => onRemoveLine(line.itemId)}
-                  >
-                    <Trash2Icon />
-                  </Button>
-                </TableCell>
+    <Card className="flex h-[80vh] flex-col">
+      <CardHeader>
+        <CardTitle>Cart</CardTitle>
+      </CardHeader>
+      <CardContent className="min-h-0 flex-1 overflow-y-auto">
+        <div ref={containerRef}>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-left w-32">Code</TableHead>
+                <TableHead className="text-left">Name</TableHead>
+                <TableHead className="text-center">Unit</TableHead>
+                <TableHead className="text-left w-20">Qty</TableHead>
+                <TableHead className="text-left w-48">Rate</TableHead>
+                <TableHead className="text-left w-52">Discount</TableHead>
+                <TableHead className="text-left">Line Total</TableHead>
+                <TableHead className="text-center">Remove</TableHead>
               </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-    </div>
+            </TableHeader>
+            <TableBody>
+              {lines.length === 0 && (
+                <TableRow>
+                  <TableCell
+                    colSpan={COLUMN_COUNT}
+                    className="py-6 text-center text-muted-foreground"
+                  >
+                    Cart is empty — scan or search for an item above.
+                  </TableCell>
+                </TableRow>
+              )}
+
+              {lines.map((line) => {
+                const { lineTotal } = computeLineTotal(line);
+                const isKg = line.item.unit === "KG";
+                const step = isKg ? "0.01" : "1";
+
+                return (
+                  <TableRow key={line.itemId} data-row-id={line.itemId}>
+                    <TableCell className="font-mono text-xs">
+                      {line.item.code}
+                    </TableCell>
+                    <TableCell className="text-left">{line.item.name}</TableCell>
+                    <TableCell className="text-center">{line.item.unit}</TableCell>
+                    <TableCell>
+                      <Input
+                        type="number"
+                        step={step}
+                        min={step}
+                        value={line.qty}
+                        className="w-20"
+                        data-field="qty"
+                        onChange={(e) =>
+                          onUpdateLine(line.itemId, { qty: Number(e.target.value) })
+                        }
+                        onKeyDown={(e) =>
+                          handleFieldKeyDown(e, line.itemId, "rate")
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={line.rate}
+                        className="w-full"
+                        data-field="rate"
+                        onChange={(e) =>
+                          onUpdateLine(line.itemId, {
+                            rate: Number(e.target.value),
+                          })
+                        }
+                        onKeyDown={(e) =>
+                          handleFieldKeyDown(e, line.itemId, "discount-type")
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex text-center items-center gap-1">
+                        <Select
+                          value={line.discountType}
+                          onValueChange={(value) => {
+                            onUpdateLine(line.itemId, {
+                              discountType: value,
+                              discountValue: 0,
+                            });
+                            setPendingDiscountFocus({ itemId: line.itemId });
+                          }}
+                        >
+                          <SelectTrigger
+                            className="w-24"
+                            data-field="discount-type"
+                          >
+                            <SelectValue />
+                          </SelectTrigger>
+                          {/*
+                            Radix restores focus to the trigger when the popup closes, which fires
+                            after (and overrides) the pendingDiscountFocus effect's own focus call
+                            below — opt out of that default so our explicit focus wins.
+                          */}
+                          <SelectContent
+                            onCloseAutoFocus={(e) => e.preventDefault()}
+                          >
+                            <SelectItem value="NONE">None</SelectItem>
+                            <SelectItem value="PERCENT">Percent</SelectItem>
+                            <SelectItem value="FLAT">Flat</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max={line.discountType === "PERCENT" ? "100" : undefined}
+                          disabled={line.discountType === "NONE"}
+                          value={line.discountValue}
+                          className="w-20"
+                          data-field="discount-value"
+                          onChange={(e) =>
+                            onUpdateLine(line.itemId, {
+                              discountValue: Number(e.target.value),
+                            })
+                          }
+                          onKeyDown={(e) =>
+                            handleFieldKeyDown(e, line.itemId, null)
+                          }
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-left">
+                      {formatRupees(lineTotal)}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`Remove ${line.item.name}`}
+                        onClick={() => onRemoveLine(line.itemId)}
+                      >
+                        <Trash2Icon />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
