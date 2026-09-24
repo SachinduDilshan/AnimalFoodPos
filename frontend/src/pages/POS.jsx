@@ -9,9 +9,7 @@ import { CartTable } from '@/components/pos/CartTable'
 import { BillSummary } from '@/components/pos/BillSummary'
 import { ReceiptPreviewDialog } from '@/components/pos/ReceiptPreviewDialog'
 
-// vatPercent is intentionally not accepted here — it's preview-only until backend
-// VAT-override support lands, and the bills schema would reject an unknown field anyway.
-function buildPayload({ lines, billDiscountType, billDiscountValue, paymentMethod, amountPaid }) {
+function buildPayload({ lines, billDiscountType, billDiscountValue, vatPercent, paymentMethod, amountPaid }) {
   return {
     items: lines.map((l) => ({
       itemId: l.itemId,
@@ -26,11 +24,11 @@ function buildPayload({ lines, billDiscountType, billDiscountValue, paymentMetho
       billDiscountType,
       billDiscountValue: Number(billDiscountValue),
     }),
+    vatPercent: Number(vatPercent),
     paymentMethod,
     ...(paymentMethod === 'CASH' && { amountPaid: Number(amountPaid) }),
     ...(paymentMethod === 'CREDIT' && Number(amountPaid) > 0 && { amountPaid: Number(amountPaid) }),
     // CARD/OTHER: amountPaid omitted — server ignores/forces it
-    // vatPercent: never sent — preview-only until backend VAT-override support lands
   }
 }
 
@@ -84,6 +82,7 @@ export default function POS() {
         lines: cart.lines,
         billDiscountType,
         billDiscountValue,
+        vatPercent,
         paymentMethod,
         amountPaid,
       })
@@ -153,6 +152,7 @@ export default function POS() {
         bill={completedBill}
         open={completedBill !== null}
         onOpenChange={handleReceiptDialogOpenChange}
+        closeLabel="New Sale"
       />
     </div>
   )

@@ -86,7 +86,7 @@ function ReceiptBody({ bill }) {
   )
 }
 
-export function ReceiptPreviewDialog({ bill, open, onOpenChange }) {
+export function ReceiptPreviewDialog({ bill, open, onOpenChange, closeLabel = 'Close' }) {
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -103,7 +103,7 @@ export function ReceiptPreviewDialog({ bill, open, onOpenChange }) {
 
               <DialogFooter>
                 <Button variant="outline" onClick={() => onOpenChange(false)}>
-                  New Sale
+                  {closeLabel}
                 </Button>
                 <Button onClick={() => window.print()}>Print</Button>
               </DialogFooter>

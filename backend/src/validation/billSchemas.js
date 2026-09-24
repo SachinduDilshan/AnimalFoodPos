@@ -34,6 +34,7 @@ const createBillSchema = z
     items: z.array(billLineSchema).min(1, 'At least one item is required'),
     billDiscountType: z.enum(DISCOUNT_TYPES).optional(),
     billDiscountValue: z.number().nonnegative().optional(),
+    vatPercent: z.number().nonnegative().max(100).default(0),
     paymentMethod: z.enum(PAYMENT_METHODS),
     amountPaid: z.number().nonnegative().optional(),
     customerId: z.number().int().positive().nullable().optional(),

@@ -38,6 +38,17 @@ function toResponse(bill) {
   };
 }
 
+function toSummaryResponse(bill) {
+  return {
+    id: bill.id,
+    billNo: bill.bill_no,
+    createdAt: bill.created_at,
+    paymentMethod: bill.payment_method,
+    grandTotal: fromCents(bill.grand_total),
+    status: bill.status,
+  };
+}
+
 function parseId(req, res) {
   const id = Number(req.params.id);
   if (!Number.isInteger(id)) {
@@ -64,6 +75,15 @@ function createBillsRouter(db) {
       if (!err.statusCode) return res.status(400).json({ error: err.message });
       throw err;
     }
+  });
+
+  router.get('/', (req, res) => {
+    const search = typeof req.query.search === 'string' ? req.query.search : undefined;
+    const limitRaw = Number(req.query.limit);
+    const offsetRaw = Number(req.query.offset);
+    const limit = Number.isInteger(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 500) : 100;
+    const offset = Number.isInteger(offsetRaw) && offsetRaw >= 0 ? offsetRaw : 0;
+    res.json(billsService.listBills({ search, limit, offset }).map(toSummaryResponse));
   });
 
   router.get('/:id', (req, res) => {
