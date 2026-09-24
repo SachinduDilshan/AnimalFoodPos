@@ -1,7 +1,7 @@
 const { z } = require('zod');
 
 const DISCOUNT_TYPES = ['PERCENT', 'FLAT'];
-const PAYMENT_METHODS = ['CASH', 'CARD', 'CREDIT', 'OTHER'];
+const PAYMENT_METHODS = ['CASH', 'CARD', 'CREDIT', 'CHEQUE', 'OTHER'];
 
 const billLineSchema = z
   .object({

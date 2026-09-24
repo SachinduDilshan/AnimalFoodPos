@@ -6,6 +6,14 @@ import { formatRupees } from '@/lib/currency'
 import { TotalRow } from '@/components/pos/TotalRow'
 import { SHOP_NAME, SHOP_ADDRESS, SHOP_PHONE } from '@/config/shopInfo'
 
+
+function parseSqliteUTC(dateStr) {
+  // SQLite's datetime('now') returns "YYYY-MM-DD HH:MM:SS" in UTC with no
+  // timezone marker, so JS would otherwise misread it as local time.
+  if (typeof dateStr !== 'string') return new Date(dateStr)
+  return new Date(dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T') + 'Z')
+}
+
 function ReceiptBody({ bill }) {
   return (
     <>
@@ -19,12 +27,13 @@ function ReceiptBody({ bill }) {
           <div className="text-lg font-semibold">INVOICE</div>
           <div>Bill No: {bill.billNo}</div>
           <div>
-            {new Date(bill.createdAt).toLocaleString('en-LK', {
+            {parseSqliteUTC(bill.createdAt).toLocaleString('en-LK', {
               day: '2-digit',
               month: 'short',
               year: 'numeric',
               hour: '2-digit',
               minute: '2-digit',
+              timeZone: 'Asia/Colombo',
             })}
           </div>
         </div>

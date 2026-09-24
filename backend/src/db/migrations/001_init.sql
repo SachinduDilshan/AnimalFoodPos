@@ -57,7 +57,7 @@ CREATE TABLE bills (
   vat_percent REAL NOT NULL DEFAULT 0,
   vat_amount INTEGER NOT NULL DEFAULT 0,
   grand_total INTEGER NOT NULL,
-  payment_method TEXT NOT NULL CHECK (payment_method IN ('CASH', 'CARD', 'CREDIT', 'OTHER')),
+  payment_method TEXT NOT NULL CHECK (payment_method IN ('CASH', 'CARD', 'CREDIT', 'CHEQUE', 'OTHER')),
   amount_paid INTEGER NOT NULL DEFAULT 0,
   change_given INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'COMPLETED' CHECK (status IN ('COMPLETED', 'VOID')),
