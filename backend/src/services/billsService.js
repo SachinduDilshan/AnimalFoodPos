@@ -12,7 +12,6 @@ function createBillsService(db) {
     RETURNING value
   `);
   const getItemStmt = db.prepare('SELECT * FROM items WHERE id = ?');
-  const getSettingsStmt = db.prepare('SELECT default_vat_percent FROM settings WHERE id = 1');
   const insertBillStmt = db.prepare(`
     INSERT INTO bills (
       bill_no, subtotal, bill_discount_type, bill_discount_value, bill_discount_amount,
@@ -44,6 +43,24 @@ function createBillsService(db) {
     if (!bill) throw new NotFoundError(`Bill ${id} not found`);
     const items = db.prepare('SELECT * FROM bill_items WHERE bill_id = ? ORDER BY id').all(id);
     return { ...bill, items };
+  }
+
+  const listBillsStmt = db.prepare(`
+    SELECT id, bill_no, created_at, payment_method, grand_total, status
+    FROM bills ORDER BY created_at DESC LIMIT @limit OFFSET @offset
+  `);
+  const searchBillsStmt = db.prepare(`
+    SELECT id, bill_no, created_at, payment_method, grand_total, status
+    FROM bills WHERE bill_no LIKE @pattern OR created_at LIKE @pattern
+    ORDER BY created_at DESC LIMIT @limit OFFSET @offset
+  `);
+
+  function listBills({ search, limit = 100, offset = 0 } = {}) {
+    const trimmed = search?.trim();
+    if (trimmed) {
+      return searchBillsStmt.all({ pattern: `%${trimmed}%`, limit, offset });
+    }
+    return listBillsStmt.all({ limit, offset });
   }
 
   function computeDiscountCents(type, value, baseCents) {
@@ -79,7 +96,7 @@ function createBillsService(db) {
       );
       const taxableAmountCents = subtotalCents - billDiscountAmountCents;
 
-      const { default_vat_percent: vatPercent } = getSettingsStmt.get();
+      const vatPercent = input.vatPercent;
       const vatAmountCents = Math.round(taxableAmountCents * (vatPercent / 100));
       const grandTotalCents = taxableAmountCents + vatAmountCents;
 
@@ -146,7 +163,7 @@ function createBillsService(db) {
     return getBillById(billId);
   }
 
-  return { createBill, getBillById };
+  return { createBill, getBillById, listBills };
 }
 
 module.exports = { createBillsService };

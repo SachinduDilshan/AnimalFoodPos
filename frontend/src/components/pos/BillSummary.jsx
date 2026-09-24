@@ -76,9 +76,6 @@ export function BillSummary({
             value={vatPercent}
             onChange={(e) => onVatPercentChange(Number(e.target.value))}
           />
-          <p className="text-xs text-muted-foreground">
-            Preview only — the completed bill uses your shop's configured VAT rate, not this value.
-          </p>
         </div>
 
         <div className="flex flex-col gap-1 border-t pt-3">
