@@ -3,7 +3,7 @@ import { useState } from 'react'
 export function useCart() {
   const [lines, setLines] = useState([])
 
-  function addItem({ item, qty = 1 }) {
+  function addItem({ item, qty = 1, rate, discountType = 'NONE', discountValue = 0 }) {
     setLines((prev) => {
       const index = prev.findIndex((l) => l.itemId === item.id)
       if (index === -1) {
@@ -13,9 +13,9 @@ export function useCart() {
             itemId: item.id,
             item,
             qty,
-            rate: item.sellingPrice,
-            discountType: 'NONE',
-            discountValue: 0,
+            rate: rate ?? item.sellingPrice,
+            discountType,
+            discountValue,
           },
         ]
       }

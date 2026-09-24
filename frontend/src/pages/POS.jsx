@@ -4,7 +4,8 @@ import client from '@/api/client'
 import { useItems } from '@/hooks/useItems'
 import { useCart } from '@/hooks/useCart'
 import { getErrorMessage } from '@/lib/apiError'
-import { ItemSearchCommand } from '@/components/pos/ItemSearchCommand'
+import { ItemPickerList } from '@/components/pos/ItemPickerList'
+import { AddToCartDialog } from '@/components/pos/AddToCartDialog'
 import { CartTable } from '@/components/pos/CartTable'
 import { BillSummary } from '@/components/pos/BillSummary'
 import { ReceiptPreviewDialog } from '@/components/pos/ReceiptPreviewDialog'
@@ -44,17 +45,47 @@ export default function POS() {
   const [submitting, setSubmitting] = useState(false)
 
   const searchRef = useRef(null)
-  const [focusRequest, setFocusRequest] = useState(null)
   const [completedBill, setCompletedBill] = useState(null)
+  // Drives AddToCartDialog for both flows:
+  //   { item, mode: 'add' } — picked from ItemPickerList, fresh defaults
+  //   { item, mode: 'edit', initialValues: { qty, rate, discountType, discountValue } } — editing an existing cart line
+  const [dialogTarget, setDialogTarget] = useState(null)
 
   function focusSearch() {
     searchRef.current?.focus()
   }
 
-  function handleAddItem(item, qty) {
-    cart.addItem({ item, qty })
-    // Always a new object so the effect fires even when re-scanning the same item twice in a row.
-    setFocusRequest({ itemId: item.id, at: Date.now() })
+  function handlePickItem(item) {
+    setDialogTarget({ item, mode: 'add' })
+  }
+
+  function handleEditLine(line) {
+    setDialogTarget({
+      item: line.item,
+      mode: 'edit',
+      initialValues: {
+        qty: line.qty,
+        rate: line.rate,
+        discountType: line.discountType,
+        discountValue: line.discountValue,
+      },
+    })
+  }
+
+  function handleDialogOpenChange(open) {
+    if (!open) {
+      setDialogTarget(null)
+      focusSearch()
+    }
+  }
+
+  function handleDialogConfirm({ qty, rate, discountType, discountValue }) {
+    if (dialogTarget?.mode === 'edit') {
+      cart.updateLine(dialogTarget.item.id, { qty, rate, discountType, discountValue })
+    } else {
+      cart.addItem({ item: dialogTarget.item, qty, rate, discountType, discountValue })
+      searchRef.current?.clear()
+    }
   }
 
   function resetForNextSale() {
@@ -113,21 +144,18 @@ export default function POS() {
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-semibold">POS</h1>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_360px]">
-        <div className="flex flex-col gap-4">
-          <ItemSearchCommand ref={searchRef} items={items} onAddItem={handleAddItem} />
-          {itemsLoading ? (
-            <p className="text-sm text-muted-foreground">Loading items…</p>
-          ) : (
-            <CartTable
-              lines={cart.lines}
-              onUpdateLine={cart.updateLine}
-              onRemoveLine={cart.removeLine}
-              focusRequest={focusRequest}
-              onFocusSearch={focusSearch}
-            />
-          )}
-        </div>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[380px_1fr_360px]">
+        <ItemPickerList ref={searchRef} items={items} onPickItem={handlePickItem} />
+
+        {itemsLoading ? (
+          <p className="text-sm text-muted-foreground">Loading items…</p>
+        ) : (
+          <CartTable
+            lines={cart.lines}
+            onEditLine={handleEditLine}
+            onRemoveLine={cart.removeLine}
+          />
+        )}
 
         <BillSummary
           lines={cart.lines}
@@ -147,6 +175,15 @@ export default function POS() {
           onCompleteSale={handleCompleteSale}
         />
       </div>
+
+      <AddToCartDialog
+        key={dialogTarget ? `${dialogTarget.mode}-${dialogTarget.item.id}` : 'none'}
+        open={dialogTarget !== null}
+        onOpenChange={handleDialogOpenChange}
+        item={dialogTarget?.item ?? null}
+        initialValues={dialogTarget?.initialValues}
+        onConfirm={handleDialogConfirm}
+      />
 
       <ReceiptPreviewDialog
         bill={completedBill}
