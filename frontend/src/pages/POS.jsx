@@ -4,7 +4,8 @@ import client from '@/api/client'
 import { useItems } from '@/hooks/useItems'
 import { useCart } from '@/hooks/useCart'
 import { getErrorMessage } from '@/lib/apiError'
-import { ItemSearchCommand } from '@/components/pos/ItemSearchCommand'
+import { ItemPickerList } from '@/components/pos/ItemPickerList'
+import { AddToCartDialog } from '@/components/pos/AddToCartDialog'
 import { CartTable } from '@/components/pos/CartTable'
 import { BillSummary } from '@/components/pos/BillSummary'
 import { ReceiptPreviewDialog } from '@/components/pos/ReceiptPreviewDialog'
@@ -46,17 +47,32 @@ export default function POS() {
   const [submitting, setSubmitting] = useState(false)
 
   const searchRef = useRef(null)
-  const [focusRequest, setFocusRequest] = useState(null)
+  // Always null now — qty/rate/discount are entered in AddToCartDialog before a line ever
+  // reaches the cart, so CartTable no longer needs to be told to auto-focus a just-added row.
+  // Left wired in (rather than removed from CartTable) since CartTable's own inline-edit
+  // Enter-chain still independently depends on the sibling onFocusSearch prop.
+  const focusRequest = null
   const [completedBill, setCompletedBill] = useState(null)
+  const [pendingItem, setPendingItem] = useState(null)
 
   function focusSearch() {
     searchRef.current?.focus()
   }
 
-  function handleAddItem(item, qty) {
-    cart.addItem({ item, qty })
-    // Always a new object so the effect fires even when re-scanning the same item twice in a row.
-    setFocusRequest({ itemId: item.id, at: Date.now() })
+  function handlePickItem(item) {
+    setPendingItem(item)
+  }
+
+  function handleAddModalOpenChange(open) {
+    if (!open) {
+      setPendingItem(null)
+      focusSearch()
+    }
+  }
+
+  function handleConfirmAdd({ qty, rate, discountType, discountValue }) {
+    cart.addItem({ item: pendingItem, qty, rate, discountType, discountValue })
+    searchRef.current?.clear()
   }
 
   function resetForNextSale() {
@@ -114,21 +130,20 @@ export default function POS() {
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-semibold">POS</h1>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_360px]">
-        <div className="flex flex-col gap-4">
-          <ItemSearchCommand ref={searchRef} items={items} onAddItem={handleAddItem} />
-          {itemsLoading ? (
-            <p className="text-sm text-muted-foreground">Loading items…</p>
-          ) : (
-            <CartTable
-              lines={cart.lines}
-              onUpdateLine={cart.updateLine}
-              onRemoveLine={cart.removeLine}
-              focusRequest={focusRequest}
-              onFocusSearch={focusSearch}
-            />
-          )}
-        </div>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[380px_1fr_360px]">
+        <ItemPickerList ref={searchRef} items={items} onPickItem={handlePickItem} />
+
+        {itemsLoading ? (
+          <p className="text-sm text-muted-foreground">Loading items…</p>
+        ) : (
+          <CartTable
+            lines={cart.lines}
+            onUpdateLine={cart.updateLine}
+            onRemoveLine={cart.removeLine}
+            focusRequest={focusRequest}
+            onFocusSearch={focusSearch}
+          />
+        )}
 
         <BillSummary
           lines={cart.lines}
@@ -148,6 +163,14 @@ export default function POS() {
           onCompleteSale={handleCompleteSale}
         />
       </div>
+
+      <AddToCartDialog
+        key={pendingItem?.id ?? 'none'}
+        open={pendingItem !== null}
+        onOpenChange={handleAddModalOpenChange}
+        item={pendingItem}
+        onConfirm={handleConfirmAdd}
+      />
 
       <ReceiptPreviewDialog
         bill={completedBill}
