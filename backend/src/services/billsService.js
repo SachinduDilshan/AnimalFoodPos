@@ -108,7 +108,7 @@ function createBillsService(db) {
           throw new Error('amountPaid is less than grandTotal for CASH payment');
         }
         changeGivenCents = amountPaidCents - grandTotalCents;
-      } else if (input.paymentMethod === 'CARD' || input.paymentMethod === 'OTHER') {
+      } else if (input.paymentMethod === 'CARD' || input.paymentMethod === 'OTHER' || input.paymentMethod === 'CHEQUE') {
         amountPaidCents = grandTotalCents;
         changeGivenCents = 0;
       } else {

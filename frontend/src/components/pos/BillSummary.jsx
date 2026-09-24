@@ -7,7 +7,7 @@ import { computeBillTotals, computeChangeDue } from '@/lib/billCalculations'
 import { formatRupees } from '@/lib/currency'
 import { TotalRow } from '@/components/pos/TotalRow'
 
-const PAYMENT_METHODS = ['CASH', 'CARD', 'CREDIT', 'OTHER']
+const PAYMENT_METHODS = ['CASH', 'CARD', 'CREDIT', 'CHEQUE', 'OTHER']
 
 export function BillSummary({
   lines,
@@ -109,9 +109,9 @@ export function BillSummary({
             type="number"
             step="0.01"
             min="0"
-            disabled={paymentMethod === 'CARD' || paymentMethod === 'OTHER'}
+            disabled={paymentMethod === 'CARD' || paymentMethod === 'OTHER' || paymentMethod === 'CHEQUE'}
             value={
-              paymentMethod === 'CARD' || paymentMethod === 'OTHER'
+              paymentMethod === 'CARD' || paymentMethod === 'OTHER' || paymentMethod === 'CHEQUE'
                 ? totals.grandTotal.toFixed(2)
                 : amountPaid
             }
