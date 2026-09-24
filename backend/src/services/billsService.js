@@ -1,26 +1,34 @@
 const { NotFoundError } = require('../utils/errors');
 const { toCents } = require('../utils/money');
 
-function formatBillNo(seq) {
-  return `BILL-${String(seq).padStart(6, '0')}`;
+const MONTH_ABBR = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+
+function invoicePeriodKey(date) {
+  return `${String(date.getFullYear()).slice(-2)}${MONTH_ABBR[date.getMonth()]}`;
+}
+
+function formatInvoiceNo(seq, date) {
+  return `${invoicePeriodKey(date)}-SF1-${String(seq).padStart(4, '0')}`;
 }
 
 function createBillsService(db) {
-  const nextBillNoStmt = db.prepare(`
-    INSERT INTO counters (name, value) VALUES ('bill_no', 1)
+  const nextCounterStmt = db.prepare(`
+    INSERT INTO counters (name, value) VALUES (@name, 1)
     ON CONFLICT(name) DO UPDATE SET value = value + 1
     RETURNING value
   `);
   const getItemStmt = db.prepare('SELECT * FROM items WHERE id = ?');
   const insertBillStmt = db.prepare(`
     INSERT INTO bills (
-      bill_no, subtotal, bill_discount_type, bill_discount_value, bill_discount_amount,
+      invoice_no, subtotal, bill_discount_type, bill_discount_value, bill_discount_amount,
       taxable_amount, vat_percent, vat_amount, grand_total,
-      payment_method, amount_paid, change_given, status, customer_id
+      payment_method, amount_paid, change_given, status, customer_id,
+      customer_name, customer_address, customer_phone, customer_vat_number
     ) VALUES (
-      @billNo, @subtotal, @billDiscountType, @billDiscountValue, @billDiscountAmount,
+      @invoiceNo, @subtotal, @billDiscountType, @billDiscountValue, @billDiscountAmount,
       @taxableAmount, @vatPercent, @vatAmount, @grandTotal,
-      @paymentMethod, @amountPaid, @changeGiven, 'COMPLETED', @customerId
+      @paymentMethod, @amountPaid, @changeGiven, 'COMPLETED', @customerId,
+      @customerName, @customerAddress, @customerPhone, @customerVatNumber
     )
   `);
   const insertBillItemStmt = db.prepare(`
@@ -46,12 +54,12 @@ function createBillsService(db) {
   }
 
   const listBillsStmt = db.prepare(`
-    SELECT id, bill_no, created_at, payment_method, grand_total, status
+    SELECT id, invoice_no, created_at, payment_method, grand_total, status
     FROM bills ORDER BY created_at DESC LIMIT @limit OFFSET @offset
   `);
   const searchBillsStmt = db.prepare(`
-    SELECT id, bill_no, created_at, payment_method, grand_total, status
-    FROM bills WHERE bill_no LIKE @pattern OR created_at LIKE @pattern
+    SELECT id, invoice_no, created_at, payment_method, grand_total, status
+    FROM bills WHERE invoice_no LIKE @pattern OR created_at LIKE @pattern
     ORDER BY created_at DESC LIMIT @limit OFFSET @offset
   `);
 
@@ -71,8 +79,9 @@ function createBillsService(db) {
 
   function createBill(input) {
     const txn = db.transaction(() => {
-      const { value: seq } = nextBillNoStmt.get();
-      const billNo = formatBillNo(seq);
+      const now = new Date();
+      const { value: seq } = nextCounterStmt.get({ name: `invoice_${invoicePeriodKey(now)}` });
+      const invoiceNo = formatInvoiceNo(seq, now);
 
       const lineComputations = input.items.map((line) => {
         const item = getItemStmt.get(line.itemId);
@@ -117,7 +126,7 @@ function createBillsService(db) {
       }
 
       const billInfo = insertBillStmt.run({
-        billNo,
+        invoiceNo,
         subtotal: subtotalCents,
         billDiscountType: input.billDiscountType ?? null,
         billDiscountValue: input.billDiscountValue ?? 0,
@@ -130,6 +139,10 @@ function createBillsService(db) {
         amountPaid: amountPaidCents,
         changeGiven: changeGivenCents,
         customerId: input.customerId ?? null,
+        customerName: input.customerName ?? '',
+        customerAddress: input.customerAddress ?? '',
+        customerPhone: input.customerPhone ?? '',
+        customerVatNumber: input.customerVatNumber ?? '',
       });
       const billId = billInfo.lastInsertRowid;
 

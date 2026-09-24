@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatRupees } from '@/lib/currency'
 import { TotalRow } from '@/components/pos/TotalRow'
-import { SHOP_NAME, SHOP_ADDRESS, SHOP_PHONE } from '@/config/shopInfo'
+import { SHOP_NAME, SHOP_ADDRESS, SHOP_PHONE, SHOP_VAT_NUMBER } from '@/config/shopInfo'
 
 
 function parseSqliteUTC(dateStr) {
@@ -17,15 +17,31 @@ function parseSqliteUTC(dateStr) {
 function ReceiptBody({ bill }) {
   return (
     <>
-      <div className="mb-4 flex items-start justify-between border-b pb-4">
-        <div>
-          <div className="text-lg font-semibold">{SHOP_NAME}</div>
-          <div className="text-muted-foreground">{SHOP_ADDRESS}</div>
-          <div className="text-muted-foreground">Tel: {SHOP_PHONE}</div>
+      <div className="mb-4 flex flex-col items-center border-b pb-4 text-center">
+        <img src="/logo.png" alt="" className="mb-2 h-16 w-auto object-contain" />
+        <div className="text-lg font-semibold">{SHOP_NAME}</div>
+        <div className="text-muted-foreground">{SHOP_ADDRESS}</div>
+        <div className="text-muted-foreground">Tel: {SHOP_PHONE}</div>
+        <div className="text-muted-foreground">VAT Reg No: {SHOP_VAT_NUMBER}</div>
+      </div>
+
+      <div className="mb-4 flex items-start justify-between">
+        <div className="text-left">
+          {(bill.customerName || bill.customerAddress || bill.customerPhone || bill.customerVatNumber) && (
+            <>
+              <div className="font-semibold">Customer Details</div>
+              {bill.customerName && <div>{bill.customerName}</div>}
+              {bill.customerAddress && <div className="text-muted-foreground">{bill.customerAddress}</div>}
+              {bill.customerPhone && <div className="text-muted-foreground">Tel: {bill.customerPhone}</div>}
+              {bill.customerVatNumber && (
+                <div className="text-muted-foreground">VAT Reg No: {bill.customerVatNumber}</div>
+              )}
+            </>
+          )}
         </div>
         <div className="text-right">
           <div className="text-lg font-semibold">INVOICE</div>
-          <div>Bill No: {bill.billNo}</div>
+          <div>Invoice No: {bill.invoiceNo}</div>
           <div>
             {parseSqliteUTC(bill.createdAt).toLocaleString('en-LK', {
               day: '2-digit',

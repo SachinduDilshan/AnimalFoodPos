@@ -1,0 +1,5 @@
+ALTER TABLE bills RENAME COLUMN bill_no TO invoice_no;
+ALTER TABLE bills ADD COLUMN customer_name TEXT NOT NULL DEFAULT '';
+ALTER TABLE bills ADD COLUMN customer_address TEXT NOT NULL DEFAULT '';
+ALTER TABLE bills ADD COLUMN customer_phone TEXT NOT NULL DEFAULT '';
+ALTER TABLE bills ADD COLUMN customer_vat_number TEXT NOT NULL DEFAULT '';

@@ -38,6 +38,10 @@ const createBillSchema = z
     paymentMethod: z.enum(PAYMENT_METHODS),
     amountPaid: z.number().nonnegative().optional(),
     customerId: z.number().int().positive().nullable().optional(),
+    customerName: z.string().trim().optional(),
+    customerAddress: z.string().trim().optional(),
+    customerPhone: z.string().trim().optional(),
+    customerVatNumber: z.string().trim().optional(),
   })
   .strict()
   .superRefine((bill, ctx) => {

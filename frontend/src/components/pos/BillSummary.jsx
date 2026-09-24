@@ -20,6 +20,14 @@ export function BillSummary({
   onPaymentMethodChange,
   amountPaid,
   onAmountPaidChange,
+  customerName,
+  onCustomerNameChange,
+  customerAddress,
+  onCustomerAddressChange,
+  customerPhone,
+  onCustomerPhoneChange,
+  customerVatNumber,
+  onCustomerVatNumberChange,
   submitting,
   onCompleteSale,
 }) {
@@ -38,6 +46,30 @@ export function BillSummary({
         <CardTitle>Bill Summary</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2 border-b pb-4">
+          <Label>Customer Details (optional)</Label>
+          <Input
+            placeholder="Customer name"
+            value={customerName}
+            onChange={(e) => onCustomerNameChange(e.target.value)}
+          />
+          <Input
+            placeholder="Address"
+            value={customerAddress}
+            onChange={(e) => onCustomerAddressChange(e.target.value)}
+          />
+          <Input
+            placeholder="Telephone number"
+            value={customerPhone}
+            onChange={(e) => onCustomerPhoneChange(e.target.value)}
+          />
+          <Input
+            placeholder="VAT Reg No"
+            value={customerVatNumber}
+            onChange={(e) => onCustomerVatNumberChange(e.target.value)}
+          />
+        </div>
+
         <div className="flex flex-col gap-1.5">
           <Label>Bill Discount</Label>
           <div className="flex items-center gap-1">

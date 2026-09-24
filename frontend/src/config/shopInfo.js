@@ -5,3 +5,4 @@
 export const SHOP_NAME = 'SATHTHAR FEED'
 export const SHOP_ADDRESS = 'No. 52, Hiripitiya Road, Wellawa.'
 export const SHOP_PHONE = '076-26661014 / 077-7781014'
+export const SHOP_VAT_NUMBER = 'TODO-VAT-NUMBER'

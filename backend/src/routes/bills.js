@@ -7,7 +7,7 @@ const { NotFoundError } = require('../utils/errors');
 function toResponse(bill) {
   return {
     id: bill.id,
-    billNo: bill.bill_no,
+    invoiceNo: bill.invoice_no,
     subtotal: fromCents(bill.subtotal),
     billDiscountType: bill.bill_discount_type,
     billDiscountValue: bill.bill_discount_value,
@@ -21,6 +21,10 @@ function toResponse(bill) {
     changeGiven: fromCents(bill.change_given),
     status: bill.status,
     customerId: bill.customer_id,
+    customerName: bill.customer_name,
+    customerAddress: bill.customer_address,
+    customerPhone: bill.customer_phone,
+    customerVatNumber: bill.customer_vat_number,
     createdAt: bill.created_at,
     items: bill.items.map((li) => ({
       id: li.id,
@@ -41,7 +45,7 @@ function toResponse(bill) {
 function toSummaryResponse(bill) {
   return {
     id: bill.id,
-    billNo: bill.bill_no,
+    invoiceNo: bill.invoice_no,
     createdAt: bill.created_at,
     paymentMethod: bill.payment_method,
     grandTotal: fromCents(bill.grand_total),
