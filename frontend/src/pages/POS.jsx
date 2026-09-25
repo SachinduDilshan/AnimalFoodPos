@@ -4,6 +4,7 @@ import client from '@/api/client'
 import { useItems } from '@/hooks/useItems'
 import { useCart } from '@/hooks/useCart'
 import { getErrorMessage } from '@/lib/apiError'
+import { SHOP_NAME, SHOP_ADDRESS, SHOP_PHONE, SHOP_VAT_NUMBER, SHOP_TIN } from '@/config/shopInfo'
 import { ItemPickerList } from '@/components/pos/ItemPickerList'
 import { AddToCartDialog } from '@/components/pos/AddToCartDialog'
 import { CartTable } from '@/components/pos/CartTable'
@@ -17,10 +18,19 @@ function buildPayload({
   vatPercent,
   paymentMethod,
   amountPaid,
+  supplierName,
+  supplierAddress,
+  supplierPhone,
+  supplierTin,
+  supplierVatNumber,
   customerName,
   customerAddress,
   customerPhone,
+  customerTin,
   customerVatNumber,
+  deliveryDate,
+  placeOfSupply,
+  additionalInfo,
 }) {
   return {
     items: lines.map((l) => ({
@@ -40,11 +50,20 @@ function buildPayload({
     paymentMethod,
     ...(paymentMethod === 'CASH' && { amountPaid: Number(amountPaid) }),
     ...(paymentMethod === 'CREDIT' && Number(amountPaid) > 0 && { amountPaid: Number(amountPaid) }),
-    // CARD/OTHER: amountPaid omitted — server ignores/forces it
+    // CARD/OTHER/CHEQUE: amountPaid omitted — server ignores/forces it
+    ...(supplierName.trim() && { supplierName: supplierName.trim() }),
+    ...(supplierAddress.trim() && { supplierAddress: supplierAddress.trim() }),
+    ...(supplierPhone.trim() && { supplierPhone: supplierPhone.trim() }),
+    ...(supplierTin.trim() && { supplierTin: supplierTin.trim() }),
+    ...(supplierVatNumber.trim() && { supplierVatNumber: supplierVatNumber.trim() }),
     ...(customerName.trim() && { customerName: customerName.trim() }),
     ...(customerAddress.trim() && { customerAddress: customerAddress.trim() }),
     ...(customerPhone.trim() && { customerPhone: customerPhone.trim() }),
+    ...(customerTin.trim() && { customerTin: customerTin.trim() }),
     ...(customerVatNumber.trim() && { customerVatNumber: customerVatNumber.trim() }),
+    ...(deliveryDate.trim() && { deliveryDate: deliveryDate.trim() }),
+    ...(placeOfSupply.trim() && { placeOfSupply: placeOfSupply.trim() }),
+    ...(additionalInfo.trim() && { additionalInfo: additionalInfo.trim() }),
   }
 }
 
@@ -57,10 +76,19 @@ export default function POS() {
   const [vatPercent, setVatPercent] = useState(0)
   const [paymentMethod, setPaymentMethod] = useState('CASH')
   const [amountPaid, setAmountPaid] = useState('')
+  const [supplierName, setSupplierName] = useState(SHOP_NAME)
+  const [supplierAddress, setSupplierAddress] = useState(SHOP_ADDRESS)
+  const [supplierPhone, setSupplierPhone] = useState(SHOP_PHONE)
+  const [supplierTin, setSupplierTin] = useState(SHOP_TIN)
+  const [supplierVatNumber, setSupplierVatNumber] = useState(SHOP_VAT_NUMBER)
   const [customerName, setCustomerName] = useState('')
   const [customerAddress, setCustomerAddress] = useState('')
   const [customerPhone, setCustomerPhone] = useState('')
+  const [customerTin, setCustomerTin] = useState('')
   const [customerVatNumber, setCustomerVatNumber] = useState('')
+  const [deliveryDate, setDeliveryDate] = useState('')
+  const [placeOfSupply, setPlaceOfSupply] = useState('')
+  const [additionalInfo, setAdditionalInfo] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   const searchRef = useRef(null)
@@ -114,10 +142,19 @@ export default function POS() {
     setVatPercent(0)
     setPaymentMethod('CASH')
     setAmountPaid('')
+    setSupplierName(SHOP_NAME)
+    setSupplierAddress(SHOP_ADDRESS)
+    setSupplierPhone(SHOP_PHONE)
+    setSupplierTin(SHOP_TIN)
+    setSupplierVatNumber(SHOP_VAT_NUMBER)
     setCustomerName('')
     setCustomerAddress('')
     setCustomerPhone('')
+    setCustomerTin('')
     setCustomerVatNumber('')
+    setDeliveryDate('')
+    setPlaceOfSupply('')
+    setAdditionalInfo('')
     focusSearch()
   }
 
@@ -139,10 +176,19 @@ export default function POS() {
         vatPercent,
         paymentMethod,
         amountPaid,
+        supplierName,
+        supplierAddress,
+        supplierPhone,
+        supplierTin,
+        supplierVatNumber,
         customerName,
         customerAddress,
         customerPhone,
+        customerTin,
         customerVatNumber,
+        deliveryDate,
+        placeOfSupply,
+        additionalInfo,
       })
       const res = await client.post('/bills', payload)
       setCompletedBill(res.data)
@@ -198,14 +244,32 @@ export default function POS() {
           onPaymentMethodChange={setPaymentMethod}
           amountPaid={amountPaid}
           onAmountPaidChange={setAmountPaid}
+          supplierName={supplierName}
+          onSupplierNameChange={setSupplierName}
+          supplierAddress={supplierAddress}
+          onSupplierAddressChange={setSupplierAddress}
+          supplierPhone={supplierPhone}
+          onSupplierPhoneChange={setSupplierPhone}
+          supplierTin={supplierTin}
+          onSupplierTinChange={setSupplierTin}
+          supplierVatNumber={supplierVatNumber}
+          onSupplierVatNumberChange={setSupplierVatNumber}
           customerName={customerName}
           onCustomerNameChange={setCustomerName}
           customerAddress={customerAddress}
           onCustomerAddressChange={setCustomerAddress}
           customerPhone={customerPhone}
           onCustomerPhoneChange={setCustomerPhone}
+          customerTin={customerTin}
+          onCustomerTinChange={setCustomerTin}
           customerVatNumber={customerVatNumber}
           onCustomerVatNumberChange={setCustomerVatNumber}
+          deliveryDate={deliveryDate}
+          onDeliveryDateChange={setDeliveryDate}
+          placeOfSupply={placeOfSupply}
+          onPlaceOfSupplyChange={setPlaceOfSupply}
+          additionalInfo={additionalInfo}
+          onAdditionalInfoChange={setAdditionalInfo}
           submitting={submitting}
           onCompleteSale={handleCompleteSale}
         />

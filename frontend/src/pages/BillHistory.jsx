@@ -15,17 +15,33 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { ReceiptPreviewDialog } from '@/components/pos/ReceiptPreviewDialog'
 
 const COLUMN_COUNT = 6
 
+function parseSqliteUTC(dateStr) {
+  if (typeof dateStr !== 'string') return new Date(dateStr)
+  return new Date(dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T') + 'Z')
+}
+
 function formatDate(value) {
-  return new Date(value).toLocaleString('en-LK', {
+  return parseSqliteUTC(value).toLocaleString('en-LK', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: 'Asia/Colombo',
   })
 }
 
@@ -34,6 +50,8 @@ export default function BillHistory() {
 
   const [viewingBill, setViewingBill] = useState(null)
   const [receiptOpen, setReceiptOpen] = useState(false)
+  const [deletingBill, setDeletingBill] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
   async function handleView(bill) {
     try {
@@ -48,6 +66,21 @@ export default function BillHistory() {
   function handleReceiptOpenChange(open) {
     setReceiptOpen(open)
     if (!open) setViewingBill(null)
+  }
+
+  async function handleConfirmDelete() {
+    if (!deletingBill) return
+    setDeleting(true)
+    try {
+      await client.delete(`/bills/${deletingBill.id}`)
+      toast.success(`Invoice ${deletingBill.invoiceNo} deleted`)
+      setDeletingBill(null)
+      refresh()
+    } catch (err) {
+      toast.error(getErrorMessage(err))
+    } finally {
+      setDeleting(false)
+    }
   }
 
   return (
@@ -112,9 +145,12 @@ export default function BillHistory() {
                     {bill.status}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => handleView(bill)}>
                     View
+                  </Button>
+                  <Button variant="destructive" size="sm" onClick={() => setDeletingBill(bill)}>
+                    Delete
                   </Button>
                 </TableCell>
               </TableRow>
@@ -128,6 +164,24 @@ export default function BillHistory() {
         onOpenChange={handleReceiptOpenChange}
         closeLabel="Close"
       />
+
+      <AlertDialog open={deletingBill !== null} onOpenChange={(open) => !open && setDeletingBill(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete invoice {deletingBill?.invoiceNo}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes the invoice and its line items. This cannot be undone, and stock
+              levels will not be restored.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} disabled={deleting}>
+              {deleting ? 'Deleting…' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

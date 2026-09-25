@@ -1,0 +1,3 @@
+ALTER TABLE bills ADD COLUMN delivery_date TEXT NOT NULL DEFAULT '';
+ALTER TABLE bills ADD COLUMN place_of_supply TEXT NOT NULL DEFAULT '';
+ALTER TABLE bills ADD COLUMN additional_info TEXT NOT NULL DEFAULT '';

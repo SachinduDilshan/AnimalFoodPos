@@ -21,10 +21,19 @@ function toResponse(bill) {
     changeGiven: fromCents(bill.change_given),
     status: bill.status,
     customerId: bill.customer_id,
+    supplierName: bill.supplier_name,
+    supplierAddress: bill.supplier_address,
+    supplierPhone: bill.supplier_phone,
+    supplierTin: bill.supplier_tin,
+    supplierVatNumber: bill.supplier_vat_number,
     customerName: bill.customer_name,
     customerAddress: bill.customer_address,
     customerPhone: bill.customer_phone,
+    customerTin: bill.customer_tin,
     customerVatNumber: bill.customer_vat_number,
+    deliveryDate: bill.delivery_date,
+    placeOfSupply: bill.place_of_supply,
+    additionalInfo: bill.additional_info,
     createdAt: bill.created_at,
     items: bill.items.map((li) => ({
       id: li.id,
@@ -95,6 +104,18 @@ function createBillsRouter(db) {
     if (id === null) return;
     try {
       res.json(toResponse(billsService.getBillById(id)));
+    } catch (err) {
+      if (err instanceof NotFoundError) return res.status(404).json({ error: err.message });
+      throw err;
+    }
+  });
+
+  router.delete('/:id', (req, res) => {
+    const id = parseId(req, res);
+    if (id === null) return;
+    try {
+      billsService.deleteBill(id);
+      res.status(204).send();
     } catch (err) {
       if (err instanceof NotFoundError) return res.status(404).json({ error: err.message });
       throw err;

@@ -19,18 +19,22 @@ function createBillsService(db) {
   `);
   const getItemStmt = db.prepare('SELECT * FROM items WHERE id = ?');
   const insertBillStmt = db.prepare(`
-    INSERT INTO bills (
-      invoice_no, subtotal, bill_discount_type, bill_discount_value, bill_discount_amount,
-      taxable_amount, vat_percent, vat_amount, grand_total,
-      payment_method, amount_paid, change_given, status, customer_id,
-      customer_name, customer_address, customer_phone, customer_vat_number
-    ) VALUES (
-      @invoiceNo, @subtotal, @billDiscountType, @billDiscountValue, @billDiscountAmount,
-      @taxableAmount, @vatPercent, @vatAmount, @grandTotal,
-      @paymentMethod, @amountPaid, @changeGiven, 'COMPLETED', @customerId,
-      @customerName, @customerAddress, @customerPhone, @customerVatNumber
-    )
-  `);
+  INSERT INTO bills (
+    invoice_no, subtotal, bill_discount_type, bill_discount_value, bill_discount_amount,
+    taxable_amount, vat_percent, vat_amount, grand_total,
+    payment_method, amount_paid, change_given, status, customer_id,
+    supplier_name, supplier_address, supplier_phone, supplier_tin, supplier_vat_number,
+    customer_name, customer_address, customer_phone, customer_tin, customer_vat_number,
+    delivery_date, place_of_supply, additional_info
+  ) VALUES (
+    @invoiceNo, @subtotal, @billDiscountType, @billDiscountValue, @billDiscountAmount,
+    @taxableAmount, @vatPercent, @vatAmount, @grandTotal,
+    @paymentMethod, @amountPaid, @changeGiven, 'COMPLETED', @customerId,
+    @supplierName, @supplierAddress, @supplierPhone, @supplierTin, @supplierVatNumber,
+    @customerName, @customerAddress, @customerPhone, @customerTin, @customerVatNumber,
+    @deliveryDate, @placeOfSupply, @additionalInfo
+  )
+`);
   const insertBillItemStmt = db.prepare(`
     INSERT INTO bill_items (
       bill_id, item_id, item_code, item_name, unit, qty, rate,
@@ -45,12 +49,23 @@ function createBillsService(db) {
     VALUES (@itemId, 'SALE', @qtyChange, @unitCost, @referenceId, NULL)
   `);
   const updateStockStmt = db.prepare('UPDATE items SET stock_qty = stock_qty - @qty WHERE id = @itemId');
+  const deleteBillItemsStmt = db.prepare('DELETE FROM bill_items WHERE bill_id = ?');
+  const deleteBillStmt = db.prepare('DELETE FROM bills WHERE id = ?');
 
   function getBillById(id) {
     const bill = db.prepare('SELECT * FROM bills WHERE id = ?').get(id);
     if (!bill) throw new NotFoundError(`Bill ${id} not found`);
     const items = db.prepare('SELECT * FROM bill_items WHERE bill_id = ? ORDER BY id').all(id);
     return { ...bill, items };
+  }
+
+  function deleteBill(id) {
+    getBillById(id); // throws NotFoundError if it doesn't exist
+    const txn = db.transaction(() => {
+      deleteBillItemsStmt.run(id);
+      deleteBillStmt.run(id);
+    });
+    txn();
   }
 
   const listBillsStmt = db.prepare(`
@@ -139,10 +154,19 @@ function createBillsService(db) {
         amountPaid: amountPaidCents,
         changeGiven: changeGivenCents,
         customerId: input.customerId ?? null,
+        supplierName: input.supplierName ?? '',
+        supplierAddress: input.supplierAddress ?? '',
+        supplierPhone: input.supplierPhone ?? '',
+        supplierTin: input.supplierTin ?? '',
+        supplierVatNumber: input.supplierVatNumber ?? '',
         customerName: input.customerName ?? '',
         customerAddress: input.customerAddress ?? '',
         customerPhone: input.customerPhone ?? '',
+        customerTin: input.customerTin ?? '',
         customerVatNumber: input.customerVatNumber ?? '',
+        deliveryDate: input.deliveryDate ?? '',
+        placeOfSupply: input.placeOfSupply ?? '',
+        additionalInfo: input.additionalInfo ?? '',
       });
       const billId = billInfo.lastInsertRowid;
 
@@ -176,7 +200,7 @@ function createBillsService(db) {
     return getBillById(billId);
   }
 
-  return { createBill, getBillById, listBills };
+  return { createBill, getBillById, listBills, deleteBill };
 }
 
 module.exports = { createBillsService };

@@ -20,14 +20,32 @@ export function BillSummary({
   onPaymentMethodChange,
   amountPaid,
   onAmountPaidChange,
+  supplierName,
+  onSupplierNameChange,
+  supplierAddress,
+  onSupplierAddressChange,
+  supplierPhone,
+  onSupplierPhoneChange,
+  supplierTin,
+  onSupplierTinChange,
+  supplierVatNumber,
+  onSupplierVatNumberChange,
   customerName,
   onCustomerNameChange,
   customerAddress,
   onCustomerAddressChange,
   customerPhone,
   onCustomerPhoneChange,
+  customerTin,
+  onCustomerTinChange,
   customerVatNumber,
   onCustomerVatNumberChange,
+  deliveryDate,
+  onDeliveryDateChange,
+  placeOfSupply,
+  onPlaceOfSupplyChange,
+  additionalInfo,
+  onAdditionalInfoChange,
   submitting,
   onCompleteSale,
 }) {
@@ -47,9 +65,38 @@ export function BillSummary({
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex flex-col gap-2 border-b pb-4">
-          <Label>Customer Details (optional)</Label>
+          <Label>Supplier Details</Label>
           <Input
-            placeholder="Customer name"
+            placeholder="Supplier name"
+            value={supplierName}
+            onChange={(e) => onSupplierNameChange(e.target.value)}
+          />
+          <Input
+            placeholder="Address"
+            value={supplierAddress}
+            onChange={(e) => onSupplierAddressChange(e.target.value)}
+          />
+          <Input
+            placeholder="Telephone number"
+            value={supplierPhone}
+            onChange={(e) => onSupplierPhoneChange(e.target.value)}
+          />
+          <Input
+            placeholder="TIN"
+            value={supplierTin}
+            onChange={(e) => onSupplierTinChange(e.target.value)}
+          />
+          <Input
+            placeholder="VAT Reg No"
+            value={supplierVatNumber}
+            onChange={(e) => onSupplierVatNumberChange(e.target.value)}
+          />
+        </div>
+
+        <div className="flex flex-col gap-2 border-b pb-4">
+          <Label>Purchaser Details (optional)</Label>
+          <Input
+            placeholder="Purchaser name"
             value={customerName}
             onChange={(e) => onCustomerNameChange(e.target.value)}
           />
@@ -64,9 +111,39 @@ export function BillSummary({
             onChange={(e) => onCustomerPhoneChange(e.target.value)}
           />
           <Input
+            placeholder="TIN"
+            value={customerTin}
+            onChange={(e) => onCustomerTinChange(e.target.value)}
+          />
+          <Input
             placeholder="VAT Reg No"
             value={customerVatNumber}
             onChange={(e) => onCustomerVatNumberChange(e.target.value)}
+          />
+        </div>
+
+        <div className="flex flex-col gap-2 border-b pb-4">
+          <Label>Delivery & Supply Details (optional)</Label>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="delivery-date" className="text-xs font-normal text-muted-foreground">
+              Date of Delivery
+            </Label>
+            <Input
+              id="delivery-date"
+              type="date"
+              value={deliveryDate}
+              onChange={(e) => onDeliveryDateChange(e.target.value)}
+            />
+          </div>
+          <Input
+            placeholder="Place of Supply"
+            value={placeOfSupply}
+            onChange={(e) => onPlaceOfSupplyChange(e.target.value)}
+          />
+          <Input
+            placeholder="Additional Information"
+            value={additionalInfo}
+            onChange={(e) => onAdditionalInfoChange(e.target.value)}
           />
         </div>
 
@@ -113,9 +190,9 @@ export function BillSummary({
         <div className="flex flex-col gap-1 border-t pt-3">
           <TotalRow label="Subtotal" value={formatRupees(totals.subtotal)} />
           <TotalRow label="Bill Discount" value={`−${formatRupees(totals.billDiscountAmount)}`} />
-          <TotalRow label="Taxable Amount" value={formatRupees(totals.taxableAmount)} />
-          <TotalRow label="VAT Amount" value={formatRupees(totals.vatAmount)} />
-          <TotalRow label="Grand Total" value={formatRupees(totals.grandTotal)} emphasize />
+          <TotalRow label="Total Value of Supply" value={formatRupees(totals.taxableAmount)} />
+          <TotalRow label={`VAT Amount (${vatPercent}%)`} value={formatRupees(totals.vatAmount)} />
+          <TotalRow label="Total Amount (Incl. VAT)" value={formatRupees(totals.grandTotal)} emphasize />
         </div>
 
         <div className="flex flex-col gap-1.5 border-t pt-3">

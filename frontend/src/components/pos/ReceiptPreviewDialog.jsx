@@ -4,7 +4,58 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatRupees } from '@/lib/currency'
 import { TotalRow } from '@/components/pos/TotalRow'
-import { SHOP_NAME, SHOP_ADDRESS, SHOP_PHONE, SHOP_VAT_NUMBER } from '@/config/shopInfo'
+import { SHOP_NAME, SHOP_ADDRESS, SHOP_PHONE, SHOP_VAT_NUMBER, SHOP_TIN } from '@/config/shopInfo'
+
+
+const ONES = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+  'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen']
+const TENS = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety']
+
+function twoDigitsToWords(n) {
+  if (n < 20) return ONES[n]
+  const tens = Math.floor(n / 10)
+  const ones = n % 10
+  return TENS[tens] + (ones ? ' ' + ONES[ones] : '')
+}
+
+function threeDigitsToWords(n) {
+  const hundreds = Math.floor(n / 100)
+  const rest = n % 100
+  let words = ''
+  if (hundreds) words += ONES[hundreds] + ' Hundred'
+  if (rest) words += (words ? ' ' : '') + twoDigitsToWords(rest)
+  return words
+}
+
+function integerToWords(n) {
+  if (n === 0) return 'Zero'
+  const crore = Math.floor(n / 10000000)
+  n %= 10000000
+  const lakh = Math.floor(n / 100000)
+  n %= 100000
+  const thousand = Math.floor(n / 1000)
+  n %= 1000
+  const hundred = n
+
+  const parts = []
+  if (crore) parts.push(threeDigitsToWords(crore) + ' Crore')
+  if (lakh) parts.push(twoDigitsToWords(lakh) + ' Lakh')
+  if (thousand) parts.push(twoDigitsToWords(thousand) + ' Thousand')
+  if (hundred) parts.push(threeDigitsToWords(hundred))
+
+  return parts.join(' ')
+}
+
+function amountInWords(amount) {
+  const rupees = Math.floor(amount)
+  const cents = Math.round((amount - rupees) * 100)
+
+  let words = integerToWords(rupees) + ' Rupees'
+  if (cents > 0) {
+    words += ' and ' + twoDigitsToWords(cents) + ' Cents'
+  }
+  return words + ' Only'
+}
 
 
 function parseSqliteUTC(dateStr) {
@@ -23,25 +74,23 @@ function ReceiptBody({ bill }) {
         <div className="text-muted-foreground">{SHOP_ADDRESS}</div>
         <div className="text-muted-foreground">Tel: {SHOP_PHONE}</div>
         <div className="text-muted-foreground">VAT Reg No: {SHOP_VAT_NUMBER}</div>
+        <div className="text-muted-foreground">TIN: {SHOP_TIN}</div>
       </div>
 
       <div className="mb-4 flex items-start justify-between">
         <div className="text-left">
-          {(bill.customerName || bill.customerAddress || bill.customerPhone || bill.customerVatNumber) && (
-            <>
-              <div className="font-semibold">Customer Details</div>
-              {bill.customerName && <div>{bill.customerName}</div>}
-              {bill.customerAddress && <div className="text-muted-foreground">{bill.customerAddress}</div>}
-              {bill.customerPhone && <div className="text-muted-foreground">Tel: {bill.customerPhone}</div>}
-              {bill.customerVatNumber && (
-                <div className="text-muted-foreground">VAT Reg No: {bill.customerVatNumber}</div>
-              )}
-            </>
+          <div className="font-semibold">Supplier</div>
+          {bill.supplierName && <div>{bill.supplierName}</div>}
+          {bill.supplierAddress && <div className="text-muted-foreground">{bill.supplierAddress}</div>}
+          {bill.supplierPhone && <div className="text-muted-foreground">Tel: {bill.supplierPhone}</div>}
+          {bill.supplierTin && <div className="text-muted-foreground">TIN: {bill.supplierTin}</div>}
+          {bill.supplierVatNumber && (
+            <div className="text-muted-foreground">VAT Reg No: {bill.supplierVatNumber}</div>
           )}
         </div>
         <div className="text-right">
-          <div className="text-lg font-semibold">INVOICE</div>
-          <div>Invoice No: {bill.invoiceNo}</div>
+          <div className="text-lg font-semibold">TAX INVOICE</div>
+          <div>TAX Invoice No: {bill.invoiceNo}</div>
           <div>
             {parseSqliteUTC(bill.createdAt).toLocaleString('en-LK', {
               day: '2-digit',
@@ -51,6 +100,36 @@ function ReceiptBody({ bill }) {
               minute: '2-digit',
               timeZone: 'Asia/Colombo',
             })}
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-4 flex items-start justify-between">
+        {(bill.customerName || bill.customerAddress || bill.customerPhone || bill.customerTin || bill.customerVatNumber) && (
+          <div className="text-left">
+            <div className="font-semibold">Purchaser</div>
+            {bill.customerName && <div>{bill.customerName}</div>}
+            {bill.customerAddress && <div className="text-muted-foreground">{bill.customerAddress}</div>}
+            {bill.customerPhone && <div className="text-muted-foreground">Tel: {bill.customerPhone}</div>}
+            {bill.customerTin && <div className="text-muted-foreground">TIN: {bill.customerTin}</div>}
+            {bill.customerVatNumber && (
+              <div className="text-muted-foreground">VAT Reg No: {bill.customerVatNumber}</div>
+            )}
+          </div>
+        )}
+
+        <div className="text-right text-sm">
+          <div>
+            <span className="font-semibold">Date of Delivery: </span>
+            {bill.deliveryDate || '\u00A0'}
+          </div>
+          <div>
+            <span className="font-semibold">Place of Supply: </span>
+            {bill.placeOfSupply || '\u00A0'}
+          </div>
+          <div>
+            <span className="font-semibold">Additional Information: </span>
+            {bill.additionalInfo || '\u00A0'}
           </div>
         </div>
       </div>
@@ -85,19 +164,26 @@ function ReceiptBody({ bill }) {
       </Table>
 
       <div className="mt-4 flex justify-end">
-        <div className="flex w-72 flex-col gap-0.5">
+        <div className="flex w-96 flex-col gap-1">
           <TotalRow label="Subtotal" value={formatRupees(bill.subtotal)} />
           {bill.billDiscountAmount > 0 && (
             <TotalRow label="Bill Discount" value={`−${formatRupees(bill.billDiscountAmount)}`} />
           )}
-          <TotalRow label="Taxable Amount" value={formatRupees(bill.taxableAmount)} />
-          <TotalRow label={`VAT (${bill.vatPercent}%)`} value={formatRupees(bill.vatAmount)} />
-          <TotalRow label="Grand Total" value={formatRupees(bill.grandTotal)} emphasize />
+          <TotalRow label="Total Value of Supply" value={formatRupees(bill.taxableAmount)} />
+          <TotalRow label={`VAT Amount (${bill.vatPercent}%)`} value={formatRupees(bill.vatAmount)} />
+          <TotalRow label="Total Amount (Incl. VAT)" value={formatRupees(bill.grandTotal)} emphasize />
+        </div>
+      </div>
+
+      <div className="mt-3 flex justify-end">
+        <div className="w-96 text-sm">
+          <span className="font-semibold">Total Amount in Words: </span>
+          {amountInWords(bill.grandTotal)}
         </div>
       </div>
 
       <div className="mt-4 flex justify-end border-t pt-4">
-        <div className="flex w-72 flex-col gap-0.5">
+        <div className="flex w-96 flex-col gap-1">
           <TotalRow label="Payment Method" value={bill.paymentMethod} />
           <TotalRow label="Amount Paid" value={formatRupees(bill.amountPaid)} />
           {(bill.paymentMethod === 'CASH' || bill.paymentMethod === 'CREDIT') && bill.changeGiven > 0 && (
@@ -109,6 +195,14 @@ function ReceiptBody({ bill }) {
       <div className="mt-8 text-center text-muted-foreground">Thank you for your business!</div>
     </>
   )
+}
+
+async function handlePrint(bill) {
+  if (window.electronAPI?.printInvoice) {
+    await window.electronAPI.printInvoice(bill.invoiceNo)
+    return
+  }
+  window.print()
 }
 
 export function ReceiptPreviewDialog({ bill, open, onOpenChange, closeLabel = 'Close' }) {
@@ -130,7 +224,7 @@ export function ReceiptPreviewDialog({ bill, open, onOpenChange, closeLabel = 'C
                 <Button variant="outline" onClick={() => onOpenChange(false)}>
                   {closeLabel}
                 </Button>
-                <Button onClick={() => window.print()}>Print</Button>
+                <Button onClick={() => handlePrint(bill)}>Print</Button>
               </DialogFooter>
             </>
           )}
