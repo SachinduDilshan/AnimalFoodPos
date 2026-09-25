@@ -8,6 +8,12 @@
     "backend",
     "frontend"
   ],
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
+    "zod": "^4.6.5"
+  },
   "scripts": {
     "dev:backend": "nodemon backend/src/dev.js",
     "dev:frontend": "npm run dev --workspace frontend",
@@ -28,12 +34,17 @@
   "build": {
     "appId": "com.animalfoodpos.app",
     "productName": "Animal Food POS",
+    "npmRebuild": false,
     "files": [
       "electron/**/*",
       "backend/**/*",
       "frontend/dist/**/*",
+      "node_modules/**/*",
       "!backend/dev.db",
       "!backend/src/**/*.sql.bak"
+    ],
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**/*"
     ],
     "extraMetadata": {
       "main": "electron/main.js"
