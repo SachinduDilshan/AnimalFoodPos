@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatRupees } from '@/lib/currency'
 import { TotalRow } from '@/components/pos/TotalRow'
-import { SHOP_NAME, SHOP_ADDRESS, SHOP_PHONE, SHOP_VAT_NUMBER } from '@/config/shopInfo'
+import { SHOP_NAME, SHOP_ADDRESS, SHOP_PHONE, SHOP_VAT_NUMBER,SHOP_TIN } from '@/config/shopInfo'
 
 
 function parseSqliteUTC(dateStr) {
@@ -22,21 +22,19 @@ function ReceiptBody({ bill }) {
         <div className="text-lg font-semibold">{SHOP_NAME}</div>
         <div className="text-muted-foreground">{SHOP_ADDRESS}</div>
         <div className="text-muted-foreground">Tel: {SHOP_PHONE}</div>
-        <div className="text-muted-foreground">VAT Reg No: 177632325-7000</div>
+        <div className="text-muted-foreground">VAT Reg No: {SHOP_VAT_NUMBER}</div>
+        <div className="text-muted-foreground">TIN: {SHOP_TIN}</div>
       </div>
 
       <div className="mb-4 flex items-start justify-between">
         <div className="text-left">
-          {(bill.customerName || bill.customerAddress || bill.customerPhone || bill.customerVatNumber) && (
-            <>
-              <div className="font-semibold">Customer Details</div>
-              {bill.customerName && <div>{bill.customerName}</div>}
-              {bill.customerAddress && <div className="text-muted-foreground">{bill.customerAddress}</div>}
-              {bill.customerPhone && <div className="text-muted-foreground">Tel: {bill.customerPhone}</div>}
-              {bill.customerVatNumber && (
-                <div className="text-muted-foreground">VAT Reg No: {bill.customerVatNumber}</div>
-              )}
-            </>
+          <div className="font-semibold">Supplier</div>
+          {bill.supplierName && <div>{bill.supplierName}</div>}
+          {bill.supplierAddress && <div className="text-muted-foreground">{bill.supplierAddress}</div>}
+          {bill.supplierPhone && <div className="text-muted-foreground">Tel: {bill.supplierPhone}</div>}
+          {bill.supplierTin && <div className="text-muted-foreground">TIN: {bill.supplierTin}</div>}
+          {bill.supplierVatNumber && (
+            <div className="text-muted-foreground">VAT Reg No: {bill.supplierVatNumber}</div>
           )}
         </div>
         <div className="text-right">
@@ -54,6 +52,19 @@ function ReceiptBody({ bill }) {
           </div>
         </div>
       </div>
+
+      {(bill.customerName || bill.customerAddress || bill.customerPhone || bill.customerTin || bill.customerVatNumber) && (
+        <div className="mb-4 text-left">
+          <div className="font-semibold">Purchaser</div>
+          {bill.customerName && <div>{bill.customerName}</div>}
+          {bill.customerAddress && <div className="text-muted-foreground">{bill.customerAddress}</div>}
+          {bill.customerPhone && <div className="text-muted-foreground">Tel: {bill.customerPhone}</div>}
+          {bill.customerTin && <div className="text-muted-foreground">TIN: {bill.customerTin}</div>}
+          {bill.customerVatNumber && (
+            <div className="text-muted-foreground">VAT Reg No: {bill.customerVatNumber}</div>
+          )}
+        </div>
+      )}
 
       <Table>
         <TableHeader>

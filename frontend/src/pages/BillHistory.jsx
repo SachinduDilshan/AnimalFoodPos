@@ -19,13 +19,19 @@ import { ReceiptPreviewDialog } from '@/components/pos/ReceiptPreviewDialog'
 
 const COLUMN_COUNT = 6
 
+function parseSqliteUTC(dateStr) {
+  if (typeof dateStr !== 'string') return new Date(dateStr)
+  return new Date(dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T') + 'Z')
+}
+
 function formatDate(value) {
-  return new Date(value).toLocaleString('en-LK', {
+  return parseSqliteUTC(value).toLocaleString('en-LK', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: 'Asia/Colombo',
   })
 }
 
