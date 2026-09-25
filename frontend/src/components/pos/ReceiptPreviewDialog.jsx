@@ -69,7 +69,7 @@ function ReceiptBody({ bill }) {
   return (
     <>
       <div className="mb-4 flex flex-col items-center border-b pb-4 text-center">
-        <img src="/logo.png" alt="" className="mb-2 h-16 w-auto object-contain" />
+        <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="mb-2 h-16 w-auto object-contain" />
         <div className="text-lg font-semibold">{SHOP_NAME}</div>
         <div className="text-muted-foreground">{SHOP_ADDRESS}</div>
         <div className="text-muted-foreground">Tel: {SHOP_PHONE}</div>
