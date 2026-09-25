@@ -49,12 +49,23 @@ function createBillsService(db) {
     VALUES (@itemId, 'SALE', @qtyChange, @unitCost, @referenceId, NULL)
   `);
   const updateStockStmt = db.prepare('UPDATE items SET stock_qty = stock_qty - @qty WHERE id = @itemId');
+  const deleteBillItemsStmt = db.prepare('DELETE FROM bill_items WHERE bill_id = ?');
+  const deleteBillStmt = db.prepare('DELETE FROM bills WHERE id = ?');
 
   function getBillById(id) {
     const bill = db.prepare('SELECT * FROM bills WHERE id = ?').get(id);
     if (!bill) throw new NotFoundError(`Bill ${id} not found`);
     const items = db.prepare('SELECT * FROM bill_items WHERE bill_id = ? ORDER BY id').all(id);
     return { ...bill, items };
+  }
+
+  function deleteBill(id) {
+    getBillById(id); // throws NotFoundError if it doesn't exist
+    const txn = db.transaction(() => {
+      deleteBillItemsStmt.run(id);
+      deleteBillStmt.run(id);
+    });
+    txn();
   }
 
   const listBillsStmt = db.prepare(`
@@ -189,7 +200,7 @@ function createBillsService(db) {
     return getBillById(billId);
   }
 
-  return { createBill, getBillById, listBills };
+  return { createBill, getBillById, listBills, deleteBill };
 }
 
 module.exports = { createBillsService };

@@ -110,6 +110,18 @@ function createBillsRouter(db) {
     }
   });
 
+  router.delete('/:id', (req, res) => {
+    const id = parseId(req, res);
+    if (id === null) return;
+    try {
+      billsService.deleteBill(id);
+      res.status(204).send();
+    } catch (err) {
+      if (err instanceof NotFoundError) return res.status(404).json({ error: err.message });
+      throw err;
+    }
+  });
+
   return router;
 }
 
