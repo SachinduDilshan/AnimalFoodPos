@@ -22,7 +22,7 @@ function ReceiptBody({ bill }) {
         <div className="text-lg font-semibold">{SHOP_NAME}</div>
         <div className="text-muted-foreground">{SHOP_ADDRESS}</div>
         <div className="text-muted-foreground">Tel: {SHOP_PHONE}</div>
-        <div className="text-muted-foreground">VAT Reg No: {SHOP_VAT_NUMBER}</div>
+        <div className="text-muted-foreground">VAT Reg No: 177632325-7000</div>
       </div>
 
       <div className="mb-4 flex items-start justify-between">
@@ -111,6 +111,14 @@ function ReceiptBody({ bill }) {
   )
 }
 
+async function handlePrint(bill) {
+  if (window.electronAPI?.printInvoice) {
+    await window.electronAPI.printInvoice(bill.invoiceNo)
+    return
+  }
+  window.print()
+}
+
 export function ReceiptPreviewDialog({ bill, open, onOpenChange, closeLabel = 'Close' }) {
   return (
     <>
@@ -130,7 +138,7 @@ export function ReceiptPreviewDialog({ bill, open, onOpenChange, closeLabel = 'C
                 <Button variant="outline" onClick={() => onOpenChange(false)}>
                   {closeLabel}
                 </Button>
-                <Button onClick={() => window.print()}>Print</Button>
+                <Button onClick={() => handlePrint(bill)}>Print</Button>
               </DialogFooter>
             </>
           )}
