@@ -28,6 +28,9 @@ function buildPayload({
   customerPhone,
   customerTin,
   customerVatNumber,
+  deliveryDate,
+  placeOfSupply,
+  additionalInfo,
 }) {
   return {
     items: lines.map((l) => ({
@@ -58,6 +61,9 @@ function buildPayload({
     ...(customerPhone.trim() && { customerPhone: customerPhone.trim() }),
     ...(customerTin.trim() && { customerTin: customerTin.trim() }),
     ...(customerVatNumber.trim() && { customerVatNumber: customerVatNumber.trim() }),
+    ...(deliveryDate.trim() && { deliveryDate: deliveryDate.trim() }),
+    ...(placeOfSupply.trim() && { placeOfSupply: placeOfSupply.trim() }),
+    ...(additionalInfo.trim() && { additionalInfo: additionalInfo.trim() }),
   }
 }
 
@@ -80,6 +86,9 @@ export default function POS() {
   const [customerPhone, setCustomerPhone] = useState('')
   const [customerTin, setCustomerTin] = useState('')
   const [customerVatNumber, setCustomerVatNumber] = useState('')
+  const [deliveryDate, setDeliveryDate] = useState('')
+  const [placeOfSupply, setPlaceOfSupply] = useState('')
+  const [additionalInfo, setAdditionalInfo] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   const searchRef = useRef(null)
@@ -143,6 +152,9 @@ export default function POS() {
     setCustomerPhone('')
     setCustomerTin('')
     setCustomerVatNumber('')
+    setDeliveryDate('')
+    setPlaceOfSupply('')
+    setAdditionalInfo('')
     focusSearch()
   }
 
@@ -174,6 +186,9 @@ export default function POS() {
         customerPhone,
         customerTin,
         customerVatNumber,
+        deliveryDate,
+        placeOfSupply,
+        additionalInfo,
       })
       const res = await client.post('/bills', payload)
       setCompletedBill(res.data)
@@ -249,6 +264,12 @@ export default function POS() {
           onCustomerTinChange={setCustomerTin}
           customerVatNumber={customerVatNumber}
           onCustomerVatNumberChange={setCustomerVatNumber}
+          deliveryDate={deliveryDate}
+          onDeliveryDateChange={setDeliveryDate}
+          placeOfSupply={placeOfSupply}
+          onPlaceOfSupplyChange={setPlaceOfSupply}
+          additionalInfo={additionalInfo}
+          onAdditionalInfoChange={setAdditionalInfo}
           submitting={submitting}
           onCompleteSale={handleCompleteSale}
         />

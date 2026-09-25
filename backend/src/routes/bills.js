@@ -31,6 +31,9 @@ function toResponse(bill) {
     customerPhone: bill.customer_phone,
     customerTin: bill.customer_tin,
     customerVatNumber: bill.customer_vat_number,
+    deliveryDate: bill.delivery_date,
+    placeOfSupply: bill.place_of_supply,
+    additionalInfo: bill.additional_info,
     createdAt: bill.created_at,
     items: bill.items.map((li) => ({
       id: li.id,

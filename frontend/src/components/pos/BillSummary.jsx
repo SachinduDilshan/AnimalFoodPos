@@ -40,6 +40,12 @@ export function BillSummary({
   onCustomerTinChange,
   customerVatNumber,
   onCustomerVatNumberChange,
+  deliveryDate,
+  onDeliveryDateChange,
+  placeOfSupply,
+  onPlaceOfSupplyChange,
+  additionalInfo,
+  onAdditionalInfoChange,
   submitting,
   onCompleteSale,
 }) {
@@ -116,6 +122,31 @@ export function BillSummary({
           />
         </div>
 
+        <div className="flex flex-col gap-2 border-b pb-4">
+          <Label>Delivery & Supply Details (optional)</Label>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="delivery-date" className="text-xs font-normal text-muted-foreground">
+              Date of Delivery
+            </Label>
+            <Input
+              id="delivery-date"
+              type="date"
+              value={deliveryDate}
+              onChange={(e) => onDeliveryDateChange(e.target.value)}
+            />
+          </div>
+          <Input
+            placeholder="Place of Supply"
+            value={placeOfSupply}
+            onChange={(e) => onPlaceOfSupplyChange(e.target.value)}
+          />
+          <Input
+            placeholder="Additional Information"
+            value={additionalInfo}
+            onChange={(e) => onAdditionalInfoChange(e.target.value)}
+          />
+        </div>
+
         <div className="flex flex-col gap-1.5">
           <Label>Bill Discount</Label>
           <div className="flex items-center gap-1">
@@ -159,9 +190,9 @@ export function BillSummary({
         <div className="flex flex-col gap-1 border-t pt-3">
           <TotalRow label="Subtotal" value={formatRupees(totals.subtotal)} />
           <TotalRow label="Bill Discount" value={`−${formatRupees(totals.billDiscountAmount)}`} />
-          <TotalRow label="Taxable Amount" value={formatRupees(totals.taxableAmount)} />
-          <TotalRow label="VAT Amount" value={formatRupees(totals.vatAmount)} />
-          <TotalRow label="Grand Total" value={formatRupees(totals.grandTotal)} emphasize />
+          <TotalRow label="Total Value of Supply" value={formatRupees(totals.taxableAmount)} />
+          <TotalRow label={`VAT Amount (${vatPercent}%)`} value={formatRupees(totals.vatAmount)} />
+          <TotalRow label="Total Amount (Incl. VAT)" value={formatRupees(totals.grandTotal)} emphasize />
         </div>
 
         <div className="flex flex-col gap-1.5 border-t pt-3">

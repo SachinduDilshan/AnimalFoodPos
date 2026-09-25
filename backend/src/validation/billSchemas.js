@@ -48,6 +48,9 @@ const createBillSchema = z
     customerPhone: z.string().trim().optional(),
     customerTin: z.string().trim().optional(),
     customerVatNumber: z.string().trim().optional(),
+    deliveryDate: z.string().trim().optional(),
+    placeOfSupply: z.string().trim().optional(),
+    additionalInfo: z.string().trim().optional(),
   })
   .strict()
   .superRefine((bill, ctx) => {

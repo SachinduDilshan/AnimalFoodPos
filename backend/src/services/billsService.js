@@ -19,20 +19,22 @@ function createBillsService(db) {
   `);
   const getItemStmt = db.prepare('SELECT * FROM items WHERE id = ?');
   const insertBillStmt = db.prepare(`
-    INSERT INTO bills (
-      invoice_no, subtotal, bill_discount_type, bill_discount_value, bill_discount_amount,
-      taxable_amount, vat_percent, vat_amount, grand_total,
-      payment_method, amount_paid, change_given, status, customer_id,
-      supplier_name, supplier_address, supplier_phone, supplier_tin, supplier_vat_number,
-      customer_name, customer_address, customer_phone, customer_tin, customer_vat_number
-    ) VALUES (
-      @invoiceNo, @subtotal, @billDiscountType, @billDiscountValue, @billDiscountAmount,
-      @taxableAmount, @vatPercent, @vatAmount, @grandTotal,
-      @paymentMethod, @amountPaid, @changeGiven, 'COMPLETED', @customerId,
-      @supplierName, @supplierAddress, @supplierPhone, @supplierTin, @supplierVatNumber,
-      @customerName, @customerAddress, @customerPhone, @customerTin, @customerVatNumber
-    )
-  `);
+  INSERT INTO bills (
+    invoice_no, subtotal, bill_discount_type, bill_discount_value, bill_discount_amount,
+    taxable_amount, vat_percent, vat_amount, grand_total,
+    payment_method, amount_paid, change_given, status, customer_id,
+    supplier_name, supplier_address, supplier_phone, supplier_tin, supplier_vat_number,
+    customer_name, customer_address, customer_phone, customer_tin, customer_vat_number,
+    delivery_date, place_of_supply, additional_info
+  ) VALUES (
+    @invoiceNo, @subtotal, @billDiscountType, @billDiscountValue, @billDiscountAmount,
+    @taxableAmount, @vatPercent, @vatAmount, @grandTotal,
+    @paymentMethod, @amountPaid, @changeGiven, 'COMPLETED', @customerId,
+    @supplierName, @supplierAddress, @supplierPhone, @supplierTin, @supplierVatNumber,
+    @customerName, @customerAddress, @customerPhone, @customerTin, @customerVatNumber,
+    @deliveryDate, @placeOfSupply, @additionalInfo
+  )
+`);
   const insertBillItemStmt = db.prepare(`
     INSERT INTO bill_items (
       bill_id, item_id, item_code, item_name, unit, qty, rate,
@@ -151,6 +153,9 @@ function createBillsService(db) {
         customerPhone: input.customerPhone ?? '',
         customerTin: input.customerTin ?? '',
         customerVatNumber: input.customerVatNumber ?? '',
+        deliveryDate: input.deliveryDate ?? '',
+        placeOfSupply: input.placeOfSupply ?? '',
+        additionalInfo: input.additionalInfo ?? '',
       });
       const billId = billInfo.lastInsertRowid;
 
