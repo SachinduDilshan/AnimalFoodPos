@@ -3,6 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const { startServer } = require('../backend/src/server');
 
+app.commandLine.appendSwitch('lang', 'en-US');
+
 let mainWindow;
 
 async function createWindow() {
@@ -11,6 +13,7 @@ async function createWindow() {
 
   mainWindow = new BrowserWindow({
     show: false,
+    icon: path.join(__dirname, 'build/icon.ico'),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,

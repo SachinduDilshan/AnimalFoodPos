@@ -13,7 +13,7 @@ export default function Layout() {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
       <aside className="flex w-56 shrink-0 flex-col border-r border-border bg-card">
-        <div className="px-4 py-4 text-lg font-semibold">Animal Food POS</div>
+        <div className="px-4 py-4 text-lg font-semibold">Saththar Feed - POS</div>
         <nav className="flex flex-col gap-1 px-2">
           {NAV_ITEMS.map((item) => (
             <NavLink

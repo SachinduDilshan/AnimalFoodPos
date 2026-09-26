@@ -1,5 +1,6 @@
 {
   "name": "animal-food-pos",
+  "author": "Saththar Feed",
   "version": "1.0.0",
   "private": true,
   "description": "Offline desktop POS + inventory app for an animal food shop",
@@ -50,7 +51,8 @@
       "main": "electron/main.js"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "electron/build/icon.ico"
     },
     "nsis": {
       "oneClick": false,

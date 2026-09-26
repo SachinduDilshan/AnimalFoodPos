@@ -35,14 +35,16 @@ function parseSqliteUTC(dateStr) {
 }
 
 function formatDate(value) {
-  return parseSqliteUTC(value).toLocaleString('en-LK', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
+  const d = parseSqliteUTC(value)
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  const yyyy = d.getFullYear()
+  const time = d.toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
     timeZone: 'Asia/Colombo',
   })
+  return `${mm}/${dd}/${yyyy} ${time}`
 }
 
 export default function BillHistory() {
