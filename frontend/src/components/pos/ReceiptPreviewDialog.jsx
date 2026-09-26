@@ -73,8 +73,6 @@ function formatDateMMDDYYYY(date) {
 }
 
 function ReceiptBody({ bill }) {
-  const createdAt = parseSqliteUTC(bill.createdAt)
-
   return (
     <>
       <div className="mb-4 flex flex-col items-center border-b pb-4 text-center">
@@ -142,22 +140,20 @@ function ReceiptBody({ bill }) {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>#</TableHead>
             <TableHead>Item</TableHead>
-            <TableHead>Code</TableHead>
             <TableHead className="text-right">Qty</TableHead>
-            <TableHead>Unit</TableHead>
-            <TableHead className="text-right">Rate</TableHead>
+            <TableHead className="text-right">Unit Price</TableHead>
             <TableHead className="text-right">Discount</TableHead>
-            <TableHead className="text-right">Line Total</TableHead>
+            <TableHead className="text-right">Amount Excluding VAT</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {bill.items.map((item) => (
+          {bill.items.map((item, index) => (
             <TableRow key={item.id}>
+              <TableCell>{index + 1}</TableCell>
               <TableCell>{item.itemName}</TableCell>
-              <TableCell className="font-mono text-xs">{item.itemCode}</TableCell>
               <TableCell className="text-right">{item.qty}</TableCell>
-              <TableCell>{item.unit}</TableCell>
               <TableCell className="text-right">{formatRupees(item.rate)}</TableCell>
               <TableCell className="text-right">
                 {item.discountAmount > 0 ? `−${formatRupees(item.discountAmount)}` : '—'}
@@ -171,6 +167,9 @@ function ReceiptBody({ bill }) {
       <div className="mt-4 flex justify-end">
         <div className="flex w-96 flex-col gap-1">
           <TotalRow label="Subtotal" value={formatRupees(bill.subtotal)} />
+          {lineDiscountTotal > 0 && (
+            <TotalRow label="Item Discounts" value={`−${formatRupees(lineDiscountTotal)}`} />
+          )}
           {bill.billDiscountAmount > 0 && (
             <TotalRow label="Bill Discount" value={`−${formatRupees(bill.billDiscountAmount)}`} />
           )}
