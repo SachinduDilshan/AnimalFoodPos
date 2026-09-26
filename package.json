@@ -51,7 +51,8 @@
       "main": "electron/main.js"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "electron/build/icon.ico"
     },
     "nsis": {
       "oneClick": false,

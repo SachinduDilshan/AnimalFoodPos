@@ -13,6 +13,7 @@ async function createWindow() {
 
   mainWindow = new BrowserWindow({
     show: false,
+    icon: path.join(__dirname, 'build/icon.ico'),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
