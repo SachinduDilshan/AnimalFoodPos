@@ -1,5 +1,6 @@
 {
   "name": "animal-food-pos",
+  "author": "Saththar Feed",
   "version": "1.0.0",
   "private": true,
   "description": "Offline desktop POS + inventory app for an animal food shop",

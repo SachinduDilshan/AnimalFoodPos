@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatRupees } from '@/lib/currency'
 import { TotalRow } from '@/components/pos/TotalRow'
-import { SHOP_NAME, SHOP_ADDRESS, SHOP_PHONE, SHOP_VAT_NUMBER, SHOP_TIN } from '@/config/shopInfo'
+import { SHOP_NAME, SHOP_ADDRESS, SHOP_PHONE } from '@/config/shopInfo'
 
 
 const ONES = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
@@ -65,16 +65,23 @@ function parseSqliteUTC(dateStr) {
   return new Date(dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T') + 'Z')
 }
 
+function formatDateMMDDYYYY(date) {
+  const mm = String(date.getMonth() + 1).padStart(2, '0')
+  const dd = String(date.getDate()).padStart(2, '0')
+  const yyyy = date.getFullYear()
+  return `${mm}/${dd}/${yyyy}`
+}
+
 function ReceiptBody({ bill }) {
+  const createdAt = parseSqliteUTC(bill.createdAt)
+
   return (
     <>
       <div className="mb-4 flex flex-col items-center border-b pb-4 text-center">
-        <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="mb-2 h-16 w-auto object-contain" />
+        <img src="/logo.png" alt="" className="mb-2 h-16 w-auto object-contain" />
         <div className="text-lg font-semibold">{SHOP_NAME}</div>
         <div className="text-muted-foreground">{SHOP_ADDRESS}</div>
         <div className="text-muted-foreground">Tel: {SHOP_PHONE}</div>
-        <div className="text-muted-foreground">VAT Reg No: {SHOP_VAT_NUMBER}</div>
-        <div className="text-muted-foreground">TIN: {SHOP_TIN}</div>
       </div>
 
       <div className="mb-4 flex items-start justify-between">
@@ -92,10 +99,8 @@ function ReceiptBody({ bill }) {
           <div className="text-lg font-semibold">TAX INVOICE</div>
           <div>TAX Invoice No: {bill.invoiceNo}</div>
           <div>
-            {parseSqliteUTC(bill.createdAt).toLocaleString('en-LK', {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric',
+            {formatDateMMDDYYYY(createdAt)}{' '}
+            {createdAt.toLocaleTimeString('en-US', {
               hour: '2-digit',
               minute: '2-digit',
               timeZone: 'Asia/Colombo',
@@ -121,7 +126,7 @@ function ReceiptBody({ bill }) {
         <div className="text-right text-sm">
           <div>
             <span className="font-semibold">Date of Delivery: </span>
-            {bill.deliveryDate || '\u00A0'}
+            {bill.deliveryDate ? formatDateMMDDYYYY(new Date(bill.deliveryDate + 'T00:00:00')) : '\u00A0'}
           </div>
           <div>
             <span className="font-semibold">Place of Supply: </span>
