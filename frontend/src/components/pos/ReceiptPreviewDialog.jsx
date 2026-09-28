@@ -72,7 +72,7 @@ function formatDateMMDDYYYY(date) {
 
 function SectionLabel({ children }) {
   return (
-    <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+    <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 print:mb-1">
       {children}
     </div>
   )
@@ -93,10 +93,19 @@ function ReceiptBody({ bill }) {
 
   return (
     <div className="mx-auto max-w-3xl bg-white text-gray-900">
+      <style>{`
+        @media print {
+          * {
+            color: #000 !important;
+            border-color: #000 !important;
+          }
+        }
+      `}</style>
+
       {/* Header */}
-      <div className="flex items-start justify-between border-b-2 border-gray-800 pb-6">
+      <div className="flex items-start justify-between border-b-2 border-gray-800 pb-6 print:pb-2">
         <div className="flex items-center gap-4">
-          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="h-14 w-auto object-contain" />
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="h-14 w-auto object-contain print:h-10" />
           <div>
             <div className="text-xl font-bold tracking-tight">{SHOP_NAME}</div>
             <div className="text-sm text-gray-500">{SHOP_ADDRESS}</div>
@@ -112,7 +121,7 @@ function ReceiptBody({ bill }) {
       </div>
 
       {/* Supplier / Purchaser */}
-      <div className="grid grid-cols-2 gap-8 border-b border-gray-200 py-6">
+      <div className="grid grid-cols-2 gap-8 border-b border-gray-200 py-6 print:py-2">
         <div>
           <SectionLabel>Supplier</SectionLabel>
           <div className="flex flex-col gap-0.5 text-sm">
@@ -136,7 +145,7 @@ function ReceiptBody({ bill }) {
       </div>
 
       {/* Delivery / Supply info */}
-      <div className="border-b border-gray-200 py-4 text-sm">
+      <div className="border-b border-gray-200 py-4 text-sm print:py-1">
         <div className="grid grid-cols-2 gap-8">
           <LabelValue
             label="Date of Delivery"
@@ -144,14 +153,14 @@ function ReceiptBody({ bill }) {
           />
           <LabelValue label="Place of Supply" value={bill.placeOfSupply} />
         </div>
-        <div className="mt-2 flex flex-col gap-0.5">
+        <div className="mt-2 flex flex-col gap-0.5 print:mt-1">
           <span className="text-gray-500">Additional Info</span>
           <span className="font-medium">{bill.additionalInfo || '—'}</span>
         </div>
       </div>
 
       {/* Items table */}
-      <table className="mt-6 w-full border-collapse text-sm">
+      <table className="mt-6 w-full border-collapse text-sm print:mt-2">
         <thead>
           <tr className="border-b-2 border-gray-800 bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
             <th className="py-2 pl-1 pr-2 text-left font-semibold">#</th>
@@ -165,68 +174,71 @@ function ReceiptBody({ bill }) {
         <tbody>
           {bill.items.map((item, index) => (
             <tr key={item.id} className="border-b border-gray-100">
-              <td className="py-2.5 pl-1 pr-2 text-gray-500">{index + 1}</td>
-              <td className="px-2 py-2.5 font-medium">{item.itemName}</td>
-              <td className="px-2 py-2.5 text-right">{item.qty}</td>
-              <td className="px-2 py-2.5 text-right">{formatRupees(item.rate)}</td>
-              <td className="px-2 py-2.5 text-right text-gray-500">
+              <td className="py-2.5 pl-1 pr-2 text-gray-500 print:py-0.5">{index + 1}</td>
+              <td className="px-2 py-2.5 font-medium print:py-0.5">{item.itemName}</td>
+              <td className="px-2 py-2.5 text-right print:py-0.5">{item.qty}</td>
+              <td className="px-2 py-2.5 text-right print:py-0.5">{formatRupees(item.rate)}</td>
+              <td className="px-2 py-2.5 text-right text-gray-500 print:py-0.5">
                 {item.discountAmount > 0 ? `−${formatRupees(item.discountAmount)}` : '—'}
               </td>
-              <td className="py-2.5 pl-2 pr-1 text-right font-medium">{formatRupees(item.lineTotal)}</td>
+              <td className="py-2.5 pl-2 pr-1 text-right font-medium print:py-0.5">{formatRupees(item.lineTotal)}</td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {/* Totals */}
-      {/* Totals */}
-      <div className="mt-6 flex justify-end">
-        <div className="w-80 text-sm">
-          <div className="flex justify-between py-1">
-            <span className="text-gray-500">Subtotal</span>
-            <span>{formatRupees(bill.subtotal)}</span>
-          </div>
-          <div className="flex justify-between py-1">
-            <span className="text-gray-500">Discount</span>
-            <span>
-              {lineDiscountTotal + bill.billDiscountAmount > 0
-                ? `−${formatRupees(lineDiscountTotal + bill.billDiscountAmount)}`
-                : formatRupees(0)}
-            </span>
-          </div>
-          <div className="flex justify-between py-1">
-            <span className="text-gray-500">Total Value of Supply</span>
-            <span>{formatRupees(bill.taxableAmount)}</span>
-          </div>
-          <div className="flex justify-between border-t border-gray-200 py-1 pt-2">
-            <span className="text-gray-500">VAT Amount ({bill.vatPercent}%)</span>
-            <span>{formatRupees(bill.vatAmount)}</span>
-          </div>
-          <div className="mt-1 flex justify-between border-t-2 border-gray-800 py-2 text-base font-bold">
-            <span>Total Amount (Incl. VAT)</span>
-            <span>{formatRupees(bill.grandTotal)}</span>
+      {/* Totals, amount in words and payment stay together on one page */}
+      <div className="break-inside-avoid">
+        <div className="mt-6 flex justify-end print:mt-2">
+          <div className="w-80 text-sm">
+            <div className="flex justify-between py-1">
+              <span className="text-gray-500">Subtotal</span>
+              <span>{formatRupees(bill.subtotal)}</span>
+            </div>
+            <div className="flex justify-between py-1">
+              <span className="text-gray-500">Discount</span>
+              <span>
+                {lineDiscountTotal + bill.billDiscountAmount > 0
+                  ? `−${formatRupees(lineDiscountTotal + bill.billDiscountAmount)}`
+                  : formatRupees(0)}
+              </span>
+            </div>
+            <div className="flex justify-between py-1">
+              <span className="text-gray-500">Total Value of Supply</span>
+              <span>{formatRupees(bill.taxableAmount)}</span>
+            </div>
+            <div className="flex justify-between border-t border-gray-200 py-1 pt-2">
+              <span className="text-gray-500">VAT Amount ({bill.vatPercent}%)</span>
+              <span>{formatRupees(bill.vatAmount)}</span>
+            </div>
+            <div className="mt-1 flex justify-between border-t-2 border-gray-800 py-2 text-base font-bold">
+              <span>Total Amount (Incl. VAT)</span>
+              <span>{formatRupees(bill.grandTotal)}</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="mt-2 flex justify-end">
-        <div className="w-80 border-t border-gray-100 pt-2 text-xs text-gray-500">
-          <span className="font-medium text-gray-700">Total Amount in Words: </span>
-          {amountInWords(bill.grandTotal)}
+        <div className="mt-2 flex justify-end">
+          <div className="w-80 border-t border-gray-100 pt-2 text-xs text-gray-500">
+            <span className="font-medium text-gray-700">In words: </span>
+            {amountInWords(bill.grandTotal)}
+          </div>
         </div>
-      </div>
 
-      {/* Payment */}
-      <div className="mt-6 flex justify-between border-t border-gray-200 pt-4 text-sm">
-        <LabelValue label="Payment Method" value={bill.paymentMethod} />
-        <div className="w-4" />
-        <LabelValue label="Amount Paid" value={formatRupees(bill.amountPaid)} />
-        {(bill.paymentMethod === 'CASH' || bill.paymentMethod === 'CREDIT') && bill.changeGiven > 0 && (
-          <>
-            <div className="w-4" />
-            <LabelValue label="Change Given" value={formatRupees(bill.changeGiven)} />
-          </>
-        )}
+        {/* Payment */}
+        <div className="mt-6 flex justify-between border-t border-gray-200 pt-4 text-sm print:mt-2 print:pt-1">
+          <LabelValue label="Payment Method" value={bill.paymentMethod} />
+          <div className="w-4" />
+          <LabelValue label="Amount Paid" value={formatRupees(bill.amountPaid)} />
+          {(bill.paymentMethod === 'CASH' || bill.paymentMethod === 'CREDIT') && bill.changeGiven > 0 && (
+            <>
+              <div className="w-4" />
+              <LabelValue label="Change Given" value={formatRupees(bill.changeGiven)} />
+            </>
+          )}
+        </div>
+
+        <div className="mt-8 text-center text-xs text-gray-400 print:mt-2">Thank you for your business!</div>
       </div>
     </div>
   )
