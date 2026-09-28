@@ -44,8 +44,8 @@ ipcMain.handle('print-invoice', async (event, invoiceNo) => {
   const pdfBuffer = await mainWindow.webContents.printToPDF({
     pageSize: { width: 9.5, height: 11 },
     printBackground: true,
-    margins: { top: 0.3, bottom: 0.3, left: 0.4, right: 0.4 },
-    scale: 0.85,
+    preferCSSPageSize: true,
+    margins: { top: 0, bottom: 0, left: 0, right: 0 },
   });
   fs.writeFileSync(filePath, pdfBuffer);
 
