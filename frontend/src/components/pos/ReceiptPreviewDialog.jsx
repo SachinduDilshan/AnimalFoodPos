@@ -242,8 +242,8 @@ function ReceiptBody({ bill }) {
 /* ------------------------------------------------------------------ */
 
 // Tune these two numbers if your forms fit more or fewer rows.
-const ROWS_PER_FULL_PAGE = 24 // item rows on a page that is NOT the last page
-const ROWS_ON_LAST_PAGE = 14 // item rows on the last page (it also holds the totals block)
+const ROWS_PER_FULL_PAGE = 22 // item rows on a page that is NOT the last page
+const ROWS_ON_LAST_PAGE = 13 // item rows on the last page (it also holds the totals block)
 
 function paginateItems(items) {
   const n = items.length
@@ -292,7 +292,7 @@ function PrintInvoice({ bill }) {
         return (
           <div
             key={pageIndex}
-            className="flex flex-col overflow-hidden bg-white text-xs text-gray-900"
+            className="flex flex-col overflow-hidden bg-white text-[13px] text-gray-900"
             style={{
               width: '9.5in',
               height: '10.95in',
@@ -311,15 +311,15 @@ function PrintInvoice({ bill }) {
                   className="h-10 w-auto object-contain"
                 />
                 <div>
-                  <div className="text-base font-bold">{SHOP_NAME}</div>
+                  <div className="text-lg font-semibold">{SHOP_NAME}</div>
                   <div>{SHOP_ADDRESS}</div>
                   <div>Tel: {SHOP_PHONE}</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-xl font-bold">TAX INVOICE</div>
+                <div className="text-2xl font-semibold">TAX INVOICE</div>
                 <div>
-                  Invoice No: <span className="font-mono font-semibold">{bill.invoiceNo}</span>
+                  Invoice No: <span className="font-mono font-medium">{bill.invoiceNo}</span>
                 </div>
                 <div>Date: {formatDateMMDDYYYY(createdAt)}</div>
                 {pageCount > 1 && (
@@ -332,7 +332,7 @@ function PrintInvoice({ bill }) {
 
             <div className="grid grid-cols-2 gap-6 border-b border-gray-400 py-2">
               <div className="flex flex-col gap-px">
-                <div className="font-bold uppercase">Supplier</div>
+                <div className="font-semibold uppercase">Supplier</div>
                 <div>Name: {bill.supplierName || '—'}</div>
                 <div>Address: {bill.supplierAddress || '—'}</div>
                 <div>Tel: {bill.supplierPhone || '—'}</div>
@@ -340,7 +340,7 @@ function PrintInvoice({ bill }) {
                 <div>VAT Reg No: {bill.supplierVatNumber || '—'}</div>
               </div>
               <div className="flex flex-col gap-px">
-                <div className="font-bold uppercase">Purchaser</div>
+                <div className="font-semibold uppercase">Purchaser</div>
                 <div>Name: {bill.customerName || '—'}</div>
                 <div>Address: {bill.customerAddress || '—'}</div>
                 <div>Tel: {bill.customerPhone || '—'}</div>
@@ -373,12 +373,12 @@ function PrintInvoice({ bill }) {
                 </colgroup>
                 <thead>
                   <tr className="h-6 border-b border-gray-800 uppercase">
-                    <th className="px-2 text-left font-semibold">#</th>
-                    <th className="px-2 text-left font-semibold">Item</th>
-                    <th className="px-2 text-right font-semibold">Qty</th>
-                    <th className="px-2 text-right font-semibold">Unit Price</th>
-                    <th className="px-2 text-right font-semibold">Discount</th>
-                    <th className="px-2 text-right font-semibold">Amount Excl. VAT</th>
+                    <th className="px-2 text-left font-medium">#</th>
+                    <th className="px-2 text-left font-medium">Item</th>
+                    <th className="px-2 text-right font-medium">Qty</th>
+                    <th className="px-2 text-right font-medium">Unit Price</th>
+                    <th className="px-2 text-right font-medium">Discount</th>
+                    <th className="px-2 text-right font-medium">Amount Excl. VAT</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -419,7 +419,7 @@ function PrintInvoice({ bill }) {
                       <span>VAT Amount ({bill.vatPercent}%)</span>
                       <span>{formatRupees(bill.vatAmount)}</span>
                     </div>
-                    <div className="mt-1 flex justify-between border-t-2 border-gray-800 pt-1 text-sm font-bold">
+                    <div className="mt-1 flex justify-between border-t-2 border-gray-800 pt-1 text-[15px] font-semibold">
                       <span>Total Amount (Incl. VAT)</span>
                       <span>{formatRupees(bill.grandTotal)}</span>
                     </div>
@@ -427,23 +427,23 @@ function PrintInvoice({ bill }) {
                 </div>
 
                 <div className="mt-1 border-t border-gray-400 pt-1">
-                  <span className="font-semibold">Total Amount in Words: </span>
+                  <span className="font-medium">Total Amount in Words: </span>
                   {amountInWords(bill.grandTotal)}
                 </div>
 
                 <div className="mt-1 flex justify-between border-t border-gray-400 pt-1">
                   <div>
-                    <span className="font-semibold">Payment Method: </span>
+                    <span className="font-medium">Payment Method: </span>
                     {bill.paymentMethod}
                   </div>
                   <div>
-                    <span className="font-semibold">Amount Paid: </span>
+                    <span className="font-medium">Amount Paid: </span>
                     {formatRupees(bill.amountPaid)}
                   </div>
                   {(bill.paymentMethod === 'CASH' || bill.paymentMethod === 'CREDIT') &&
                     bill.changeGiven > 0 && (
                       <div>
-                        <span className="font-semibold">Change Given: </span>
+                        <span className="font-medium">Change Given: </span>
                         {formatRupees(bill.changeGiven)}
                       </div>
                     )}
