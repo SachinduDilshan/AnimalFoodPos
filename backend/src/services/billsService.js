@@ -37,10 +37,10 @@ function createBillsService(db) {
 `);
   const insertBillItemStmt = db.prepare(`
     INSERT INTO bill_items (
-      bill_id, item_id, item_code, item_name, unit, qty, rate,
+      bill_id, item_id, item_code, item_name, unit, qty, rate, cost_price,
       discount_type, discount_value, discount_amount, line_total
     ) VALUES (
-      @billId, @itemId, @itemCode, @itemName, @unit, @qty, @rate,
+      @billId, @itemId, @itemCode, @itemName, @unit, @qty, @rate, @costPrice,
       @discountType, @discountValue, @discountAmount, @lineTotal
     )
   `);
@@ -108,7 +108,9 @@ function createBillsService(db) {
         const discountAmountCents = computeDiscountCents(line.discountType, line.discountValue, grossCents);
         const lineTotalCents = grossCents - discountAmountCents;
 
-        return { item, line, rateCents, discountAmountCents, lineTotalCents };
+        const costCents = Math.round(item.cost_price * line.qty);
+
+        return { item, line, rateCents, discountAmountCents, lineTotalCents, costCents };
       });
 
       const subtotalCents = lineComputations.reduce((sum, l) => sum + l.lineTotalCents, 0);
@@ -121,7 +123,9 @@ function createBillsService(db) {
       const taxableAmountCents = subtotalCents - billDiscountAmountCents;
 
       const vatPercent = input.vatPercent;
-      const vatAmountCents = Math.round(taxableAmountCents * (vatPercent / 100));
+      // VAT is charged on the items' cost price (not the selling price) and added on top.
+      const vatBaseCents = lineComputations.reduce((sum, l) => sum + l.costCents, 0);
+      const vatAmountCents = Math.round(vatBaseCents * (vatPercent / 100));
       const grandTotalCents = taxableAmountCents + vatAmountCents;
 
       let amountPaidCents;
@@ -179,6 +183,7 @@ function createBillsService(db) {
           unit: l.item.unit,
           qty: l.line.qty,
           rate: l.rateCents,
+          costPrice: l.item.cost_price,
           discountType: l.line.discountType ?? null,
           discountValue: l.line.discountValue ?? 0,
           discountAmount: l.discountAmountCents,

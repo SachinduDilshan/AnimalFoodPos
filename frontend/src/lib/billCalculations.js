@@ -14,7 +14,9 @@ export function computeBillTotals({ lines, billDiscountType, billDiscountValue, 
   const subtotal = lines.reduce((sum, l) => sum + computeLineTotal(l).lineTotal, 0)
   const billDiscountAmount = computeDiscountAmount(billDiscountType, billDiscountValue, subtotal)
   const taxableAmount = subtotal - billDiscountAmount
-  const vatAmount = taxableAmount * ((vatPercent || 0) / 100)
+  // VAT is charged on the items' cost price (not the selling price) and added on top.
+  const vatBase = lines.reduce((sum, l) => sum + l.qty * (l.item?.costPrice ?? 0), 0)
+  const vatAmount = vatBase * ((vatPercent || 0) / 100)
   return { subtotal, billDiscountAmount, taxableAmount, vatAmount, grandTotal: taxableAmount + vatAmount }
 }
 
