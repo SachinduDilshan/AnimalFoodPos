@@ -1,0 +1,1 @@
+ALTER TABLE bill_items ADD COLUMN cost_price INTEGER NOT NULL DEFAULT 0;
