@@ -8,7 +8,7 @@ function invoicePeriodKey(date) {
 }
 
 function formatInvoiceNo(seq, date) {
-  return `${invoicePeriodKey(date)}-SF1-${String(seq).padStart(4, '0')}`;
+  return `${invoicePeriodKey(date)}_SF1_${String(seq).padStart(4, '0')}`;
 }
 
 function createBillsService(db) {

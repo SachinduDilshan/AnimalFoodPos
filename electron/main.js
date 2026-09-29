@@ -1,6 +1,8 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
+const { exec } = require('child_process');
 const { startServer } = require('../backend/src/server');
 
 app.commandLine.appendSwitch('lang', 'en-US');
@@ -39,10 +41,35 @@ ipcMain.handle('print-invoice', async (event, invoiceNo) => {
 
   if (canceled || !filePath) return { success: false };
 
-  const pdfBuffer = await mainWindow.webContents.printToPDF({});
+  const pdfBuffer = await mainWindow.webContents.printToPDF({
+    pageSize: { width: 9.5, height: 11 },
+    printBackground: true,
+    preferCSSPageSize: true,
+    margins: { top: 0, bottom: 0, left: 0, right: 0 },
+  });
   fs.writeFileSync(filePath, pdfBuffer);
 
   return { success: true, filePath };
+});
+
+// Plain-text print straight to the Windows default printer (used for the dot matrix printer)
+ipcMain.handle('print-raw-text', async (event, { printerName, text }) => {
+  return new Promise((resolve) => {
+    const tempFile = path.join(os.tmpdir(), `invoice-${Date.now()}.txt`);
+    fs.writeFileSync(tempFile, text, 'utf8');
+
+    const printerArg = printerName ? `-Name '${printerName.replace(/'/g, "''")}'` : '';
+    const command = `powershell -NoProfile -Command "Get-Content -Path '${tempFile}' -Encoding UTF8 | Out-Printer ${printerArg}"`;
+
+    exec(command, (error) => {
+      fs.unlink(tempFile, () => { });
+      if (error) {
+        resolve({ success: false, error: error.message });
+      } else {
+        resolve({ success: true });
+      }
+    });
+  });
 });
 
 app.whenReady().then(createWindow);
