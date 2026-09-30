@@ -27,18 +27,15 @@ function threeDigitsToWords(n) {
 
 function integerToWords(n) {
   if (n === 0) return 'Zero'
-  const crore = Math.floor(n / 10000000)
-  n %= 10000000
-  const lakh = Math.floor(n / 100000)
-  n %= 100000
+  const million = Math.floor(n / 1000000)
+  n %= 1000000
   const thousand = Math.floor(n / 1000)
   n %= 1000
   const hundred = n
 
   const parts = []
-  if (crore) parts.push(threeDigitsToWords(crore) + ' Crore')
-  if (lakh) parts.push(twoDigitsToWords(lakh) + ' Lakh')
-  if (thousand) parts.push(twoDigitsToWords(thousand) + ' Thousand')
+  if (million) parts.push(threeDigitsToWords(million) + ' Million')
+  if (thousand) parts.push(threeDigitsToWords(thousand) + ' Thousand')
   if (hundred) parts.push(threeDigitsToWords(hundred))
 
   return parts.join(' ')
@@ -184,7 +181,7 @@ function ReceiptBody({ bill }) {
 
       {/* Totals */}
       <div className="mt-6 flex justify-end">
-        <div className="w-80 text-sm">
+        <div className="w-96 text-sm">
           <div className="flex justify-between py-1">
             <span className="text-gray-500">Subtotal</span>
             <span>{formatRupees(bill.subtotal)}</span>
@@ -202,12 +199,12 @@ function ReceiptBody({ bill }) {
             <span>{formatRupees(bill.taxableAmount)}</span>
           </div>
           <div className="flex justify-between border-t border-gray-200 py-1 pt-2">
-            <span className="text-gray-500">VAT Amount ({bill.vatPercent}%)</span>
+            <span className="text-gray-500">VAT Amount</span>
             <span>{formatRupees(bill.vatAmount)}</span>
           </div>
-          <div className="mt-1 flex justify-between border-t-2 border-gray-800 py-2 text-base font-bold">
+          <div className="mt-1 flex justify-between gap-4 border-t-2 border-gray-800 py-2 text-base font-bold">
             <span>Total Amount (Incl. VAT)</span>
-            <span>{formatRupees(bill.grandTotal)}</span>
+            <span className="whitespace-nowrap">{formatRupees(bill.grandTotal)}</span>
           </div>
         </div>
       </div>
@@ -402,7 +399,7 @@ function PrintInvoice({ bill }) {
             {isLast ? (
               <div className="mt-2">
                 <div className="flex justify-end">
-                  <div className="w-72">
+                  <div className="w-80">
                     <div className="flex justify-between py-0.5">
                       <span>Subtotal</span>
                       <span>{formatRupees(bill.subtotal)}</span>
@@ -416,12 +413,12 @@ function PrintInvoice({ bill }) {
                       <span>{formatRupees(bill.taxableAmount)}</span>
                     </div>
                     <div className="flex justify-between py-0.5">
-                      <span>VAT Amount ({bill.vatPercent}%)</span>
+                      <span>VAT Amount</span>
                       <span>{formatRupees(bill.vatAmount)}</span>
                     </div>
-                    <div className="mt-1 flex justify-between border-t-2 border-gray-800 pt-1 text-[15px] font-semibold">
+                    <div className="mt-1 flex justify-between gap-4 border-t-2 border-gray-800 pt-1 text-[15px] font-semibold">
                       <span>Total Amount (Incl. VAT)</span>
-                      <span>{formatRupees(bill.grandTotal)}</span>
+                      <span className="whitespace-nowrap">{formatRupees(bill.grandTotal)}</span>
                     </div>
                   </div>
                 </div>
