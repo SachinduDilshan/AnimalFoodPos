@@ -199,7 +199,7 @@ function ReceiptBody({ bill }) {
             <span>{formatRupees(bill.taxableAmount)}</span>
           </div>
           <div className="flex justify-between border-t border-gray-200 py-1 pt-2">
-            <span className="text-gray-500">VAT Amount ({bill.vatPercent}%)</span>
+            <span className="text-gray-500">VAT Amount</span>
             <span>{formatRupees(bill.vatAmount)}</span>
           </div>
           <div className="mt-1 flex justify-between gap-4 border-t-2 border-gray-800 py-2 text-base font-bold">
@@ -413,7 +413,7 @@ function PrintInvoice({ bill }) {
                       <span>{formatRupees(bill.taxableAmount)}</span>
                     </div>
                     <div className="flex justify-between py-0.5">
-                      <span>VAT Amount ({bill.vatPercent}%)</span>
+                      <span>VAT Amount</span>
                       <span>{formatRupees(bill.vatAmount)}</span>
                     </div>
                     <div className="mt-1 flex justify-between gap-4 border-t-2 border-gray-800 pt-1 text-[15px] font-semibold">
