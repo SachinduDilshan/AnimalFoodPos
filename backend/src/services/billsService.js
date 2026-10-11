@@ -108,9 +108,7 @@ function createBillsService(db) {
         const discountAmountCents = computeDiscountCents(line.discountType, line.discountValue, grossCents);
         const lineTotalCents = grossCents - discountAmountCents;
 
-        const costCents = Math.round(item.cost_price * line.qty);
-
-        return { item, line, rateCents, discountAmountCents, lineTotalCents, costCents };
+        return { item, line, rateCents, discountAmountCents, lineTotalCents };
       });
 
       const subtotalCents = lineComputations.reduce((sum, l) => sum + l.lineTotalCents, 0);
@@ -123,9 +121,7 @@ function createBillsService(db) {
       const taxableAmountCents = subtotalCents - billDiscountAmountCents;
 
       const vatPercent = input.vatPercent;
-      // VAT is charged on the items' cost price (not the selling price) and added on top.
-      const vatBaseCents = lineComputations.reduce((sum, l) => sum + l.costCents, 0);
-      const vatAmountCents = Math.round(vatBaseCents * (vatPercent / 100));
+      const vatAmountCents = Math.round(taxableAmountCents * (vatPercent / 100));
       const grandTotalCents = taxableAmountCents + vatAmountCents;
 
       let amountPaidCents;
