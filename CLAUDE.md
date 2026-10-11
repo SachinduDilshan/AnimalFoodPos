@@ -40,10 +40,10 @@ database server.
 - **Billing math happens server-side.** The frontend may preview totals for
   UX, but the authoritative subtotal/discount/VAT/grand-total calculation is
   done in the backend when the bill is created.
-- **VAT is calculated on cost price, not selling price.** VAT = VAT% × Σ(item
-  cost price × qty), unaffected by discounts, and added on top of the selling
-  total (subtotal − bill discount). `bill_items.cost_price` snapshots the cost
-  at sale time.
+- **VAT is calculated on the selling price, after discounts.** VAT = VAT% ×
+  (subtotal − bill discount), added to get the grand total.
+  `bill_items.cost_price` snapshots the item's cost at sale time (not used in
+  the VAT calculation).
 - **Items are soft-deleted.** Set `is_active = 0`; never `DELETE` an item that
   might be referenced by stock movements or bills.
 - **Express binds to `127.0.0.1` only.** This is a single-machine, offline
