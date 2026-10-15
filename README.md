@@ -419,4 +419,4 @@ The detailed requirements and open client questions live in [`docs/POS-Product-R
 
 ## License
 
-Proprietary — all rights reserved. *(Update this section before distributing the software to clients.)*
+Proprietary — all rights reserved.
